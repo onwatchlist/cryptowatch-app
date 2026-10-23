@@ -9,199 +9,330 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CryptoWatch">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F4F5F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0A0B0E" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-1024.png">
 <link rel="icon" href="icon-1024.png">
 <style>
 :root {
-  --bg: #F2F2F7; --card: #FFFFFF; --text: #000000; --sub: #6C6C70; --sep: #D8D8DC;
-  --accent: #007AFF; --accent-text: #0062CC; --seg: #E4E4E9; --seg-on: #FFFFFF;
-  --up: #248A3D; --down: #D70015; --pill-up: #248A3D; --pill-down: #D70015;
-  --chev: #B0B0B5; --dim: rgba(0,0,0,0.35); --field: #FFFFFF; --warn: #C93400;
+  --bg: #F4F5F7; --bar: rgba(244,245,247,0.82); --card: #FFFFFF; --card2: #F0F1F4; --text: #0B0C10; --sub: #646873; --faint: #9A9EA8;
+  --sep: rgba(15,20,30,0.08); --accent: #4F5BD5; --accent-soft: rgba(79,91,213,0.12); --accent-text: #3B46B8;
+  --up: #12833F; --up-soft: rgba(18,131,63,0.12); --down: #C8231F; --down-soft: rgba(200,35,31,0.11);
+  --shadow: 0 1px 2px rgba(16,24,40,0.05), 0 6px 20px rgba(16,24,40,0.05); --dim: rgba(10,12,16,0.38); --sk: #E6E8EC; --sk2: #F2F3F6;
+  --warn: #B54708; --warn-soft: rgba(181,71,8,0.1);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #000000; --card: #1C1C1E; --text: #FFFFFF; --sub: #98989F; --sep: #38383A;
-    --accent: #0A84FF; --accent-text: #409CFF; --seg: #2C2C2E; --seg-on: #636366;
-    --up: #30D158; --down: #FF453A; --chev: #5A5A5E; --dim: rgba(0,0,0,0.6); --field: #1C1C1E; --warn: #FF9F0A;
+    --bg: #0A0B0E; --bar: rgba(10,11,14,0.78); --card: #15171C; --card2: #1D2027; --text: #F4F5F7; --sub: #9499A6; --faint: #6A6F7B;
+    --sep: rgba(255,255,255,0.07); --accent: #7C86FF; --accent-soft: rgba(124,134,255,0.16); --accent-text: #A3AAFF;
+    --up: #34D17A; --up-soft: rgba(52,209,122,0.14); --down: #FF6B63; --down-soft: rgba(255,107,99,0.14);
+    --shadow: none; --dim: rgba(0,0,0,0.6); --sk: #1D2027; --sk2: #262A32; --warn: #FDB022; --warn-soft: rgba(253,176,34,0.12);
   }
 }
 :root[data-theme="dark"] {
-  --bg: #000000; --card: #1C1C1E; --text: #FFFFFF; --sub: #98989F; --sep: #38383A;
-  --accent: #0A84FF; --accent-text: #409CFF; --seg: #2C2C2E; --seg-on: #636366;
-  --up: #30D158; --down: #FF453A; --chev: #5A5A5E; --dim: rgba(0,0,0,0.6); --field: #1C1C1E; --warn: #FF9F0A;
+  --bg: #0A0B0E; --bar: rgba(10,11,14,0.78); --card: #15171C; --card2: #1D2027; --text: #F4F5F7; --sub: #9499A6; --faint: #6A6F7B;
+  --sep: rgba(255,255,255,0.07); --accent: #7C86FF; --accent-soft: rgba(124,134,255,0.16); --accent-text: #A3AAFF;
+  --up: #34D17A; --up-soft: rgba(52,209,122,0.14); --down: #FF6B63; --down-soft: rgba(255,107,99,0.14);
+  --shadow: none; --dim: rgba(0,0,0,0.6); --sk: #1D2027; --sk2: #262A32; --warn: #FDB022; --warn-soft: rgba(253,176,34,0.12);
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { margin: 0; background: var(--bg); color: var(--text); }
+html, body { margin: 0; background: var(--bg); color: var(--text); overscroll-behavior-y: none; }
 body {
-  font-family: -apple-system, "SF Pro Text", system-ui, sans-serif; font-size: 17px;
-  padding: env(safe-area-inset-top) env(safe-area-inset-right) calc(24px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
-  -webkit-text-size-adjust: 100%; overscroll-behavior-y: none;
+  font-family: -apple-system, "SF Pro Text", system-ui, "Segoe UI", sans-serif; font-size: 16px; line-height: 1.35;
+  padding: 0 env(safe-area-inset-right) calc(32px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
+  -webkit-text-size-adjust: 100%; -webkit-font-smoothing: antialiased;
 }
 button, input, textarea, select { font: inherit; color: inherit; }
 button { cursor: pointer; }
-.wrap { max-width: 560px; margin: 0 auto; }
-.num { font-variant-numeric: tabular-nums; }
-.mono { font-family: ui-monospace, Menlo, monospace; }
+a { color: inherit; text-decoration: none; }
+.wrap { max-width: 600px; margin: 0 auto; }
+.r { font-family: ui-rounded, "SF Pro Rounded", -apple-system, system-ui, sans-serif; }
+.num, .n { font-variant-numeric: tabular-nums; }
+.mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .sub { color: var(--sub); }
 .up { color: var(--up); } .down { color: var(--down); }
 
-.nav { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; min-height: 44px; padding: 4px 8px; }
-.nav .left { display: flex; justify-content: flex-start; }
-.nav .right { display: flex; justify-content: flex-end; gap: 2px; }
-.nav .title { font-weight: 600; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
-.icon-btn { width: 44px; height: 44px; border: 0; background: transparent; color: var(--accent); display: inline-flex; align-items: center; justify-content: center; padding: 0; border-radius: 22px; }
-.text-btn { min-height: 44px; border: 0; background: transparent; color: var(--accent); padding: 0 8px; font-size: 17px; display: inline-flex; align-items: center; gap: 4px; }
-.text-btn.bold { font-weight: 600; }
-.text-btn:disabled { color: var(--sub); }
-.large-title { margin: 2px 16px 10px; font-size: 34px; font-weight: 700; letter-spacing: 0.3px; }
-.spin { animation: spin 0.9s linear infinite; }
+/* Top bar */
+.topbar { position: sticky; top: 0; z-index: 20; padding: env(safe-area-inset-top) 8px 0; background: var(--bar); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); }
+.topbar-in { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; min-height: 48px; }
+.topbar .l { display: flex; align-items: center; gap: 4px; }
+.topbar .rr { display: flex; justify-content: flex-end; align-items: center; }
+.topbar .t { font-weight: 650; font-size: 17px; text-align: center; max-width: 190px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ib { width: 44px; height: 44px; border: 0; background: transparent; color: var(--text); display: inline-flex; align-items: center; justify-content: center; border-radius: 22px; padding: 0; }
+.ib:active { background: var(--card2); }
+.ib.accent { color: var(--accent); }
+.back { display: inline-flex; align-items: center; gap: 2px; min-height: 44px; padding: 0 10px 0 4px; color: var(--accent); font-size: 17px; border: 0; background: transparent; }
+.tb { min-height: 44px; border: 0; background: transparent; color: var(--accent); padding: 0 10px; font-size: 17px; }
+.tb.bold { font-weight: 650; } .tb:disabled { color: var(--faint); }
+.live-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px 5px 9px; margin-left: 6px; border-radius: 99px; background: var(--card); box-shadow: var(--shadow); font-size: 12px; font-weight: 600; color: var(--sub); }
+.pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--up); position: relative; }
+.pulse::after { content: ""; position: absolute; inset: -3px; border-radius: 50%; background: var(--up); opacity: 0.35; animation: pulse 2s ease-out infinite; }
+.pulse.off { background: var(--warn); } .pulse.off::after { background: var(--warn); }
+@keyframes pulse { 0% { transform: scale(0.6); opacity: 0.5; } 100% { transform: scale(2.2); opacity: 0; } }
+.spin { animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.card { background: var(--card); border-radius: 12px; margin: 0 16px; overflow: hidden; }
-.pad { padding: 16px; }
-.section-h { padding: 22px 32px 7px; font-size: 13px; color: var(--sub); text-transform: uppercase; letter-spacing: 0.2px; }
-.section-f { padding: 8px 32px 0; font-size: 12px; color: var(--sub); line-height: 1.4; }
+/* Pages */
+.page { animation: fadeIn 0.25s ease; }
+.page.push { animation: pushIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+@keyframes fadeIn { from { opacity: 0; } }
+@keyframes pushIn { from { opacity: 0; transform: translateX(28px); } }
+.h1 { margin: 6px 20px 2px; font-size: 32px; font-weight: 750; letter-spacing: -0.4px; }
 
-.summary { display: flex; flex-direction: column; gap: 10px; }
-.big { font-size: 38px; font-weight: 700; letter-spacing: -0.5px; font-family: ui-rounded, -apple-system, system-ui, sans-serif; line-height: 1.1; overflow-wrap: anywhere; }
-.change-line { display: flex; gap: 6px; align-items: center; font-size: 15px; font-weight: 600; min-height: 20px; flex-wrap: wrap; }
-.seg { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px; background: var(--seg); border-radius: 9px; padding: 2px; }
-.seg button { height: 32px; border: 0; border-radius: 7px; background: transparent; font-size: 13px; font-weight: 500; }
-.seg button[aria-pressed="true"] { background: var(--seg-on); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
-.chart { display: block; width: 100%; }
-.chart-empty { display: flex; align-items: center; justify-content: center; background: var(--seg); border-radius: 10px; font-size: 12px; color: var(--sub); }
-.caption { font-size: 11px; color: var(--sub); }
+/* Hero */
+.hero { padding: 14px 20px 6px; }
+.hero-label { display: inline-flex; align-items: center; gap: 6px; border: 0; background: transparent; padding: 4px 0; color: var(--sub); font-size: 14px; font-weight: 550; }
+.hero-value { font-size: 44px; font-weight: 750; letter-spacing: -1.2px; line-height: 1.08; margin-top: 2px; overflow-wrap: anywhere; }
+.hero-value.small { font-size: 38px; }
+.hero-sub { display: flex; align-items: center; gap: 8px; margin-top: 8px; min-height: 26px; flex-wrap: wrap; font-size: 14px; }
+.chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 9px; border-radius: 99px; font-size: 14px; font-weight: 650; white-space: nowrap; }
+.chip.up { background: var(--up-soft); color: var(--up); } .chip.down { background: var(--down-soft); color: var(--down); }
+.chip.sm { font-size: 12px; padding: 3px 7px; }
+.chip.flat { background: var(--card2); color: var(--sub); }
+.n.flash-up { animation: flashUp 0.9s ease; } .n.flash-down { animation: flashDown 0.9s ease; }
+@keyframes flashUp { 0%, 40% { color: var(--up); } }
+@keyframes flashDown { 0%, 40% { color: var(--down); } }
 
-.actions { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin: 18px 16px 0; }
-.action { display: flex; flex-direction: column; align-items: center; gap: 6px; border: 0; background: transparent; padding: 0; color: var(--text); font-size: 12px; font-weight: 500; }
-.action .circle { width: 52px; height: 52px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; color: #FFFFFF; }
+/* Charts */
+.chart { position: relative; margin: 12px 0 0; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.chart svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.chart .sl { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--faint); opacity: 0; pointer-events: none; }
+.chart .sd { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; border: 2.5px solid var(--card); opacity: 0; pointer-events: none; box-shadow: 0 1px 4px rgba(0,0,0,0.25); }
+.chart.scrub .sl, .chart.scrub .sd { opacity: 1; }
+.chart-sk { margin: 12px 20px 0; border-radius: 14px; }
+.periods { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: 14px 20px 0; }
+.periods button { height: 34px; border: 0; border-radius: 99px; background: transparent; color: var(--sub); font-size: 13px; font-weight: 650; letter-spacing: 0.2px; }
+.periods button[aria-pressed="true"] { background: var(--card); color: var(--text); box-shadow: var(--shadow); }
 
-.row { display: flex; align-items: center; gap: 12px; padding: 10px 14px 10px 16px; min-height: 64px; width: 100%; border: 0; background: transparent; text-align: left; color: var(--text); text-decoration: none; position: relative; }
-.row + .row::before { content: ""; position: absolute; top: 0; left: 64px; right: 0; border-top: 0.5px solid var(--sep); }
-.row:active { background: var(--seg); }
-.row .main { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
-.row .name { font-size: 17px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.row .meta { display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--sub); white-space: nowrap; overflow: hidden; }
-.row .end { display: flex; flex-direction: column; gap: 3px; align-items: flex-end; min-width: 80px; }
-.row .value { font-size: 15px; font-weight: 600; }
-.chev { flex-shrink: 0; color: var(--chev); }
-.wallet-icon { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #FFFFFF; }
-.badge { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #FFFFFF; font-size: 11px; font-weight: 700; letter-spacing: -0.2px; overflow: hidden; }
-.tag { font-size: 11px; font-weight: 600; border-radius: 99px; padding: 2px 6px; }
-.pill { font-size: 12px; font-weight: 600; color: #FFFFFF; border-radius: 6px; padding: 3px 7px; }
-.pill.up { background: var(--pill-up); color: #FFFFFF; } .pill.down { background: var(--pill-down); color: #FFFFFF; } .pill.none { background: transparent; color: var(--sub); }
-.spark { width: 52px; height: 24px; flex-shrink: 0; }
-.kv { display: flex; justify-content: space-between; align-items: center; padding: 0 16px; min-height: 44px; gap: 12px; }
-.kv + .kv { border-top: 0.5px solid var(--sep); }
-.warn { color: var(--warn); font-size: 14px; display: flex; gap: 8px; align-items: flex-start; padding: 12px 16px; }
-.live { display: flex; gap: 6px; align-items: center; padding: 10px 32px; font-size: 11px; color: var(--sub); }
-.dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.empty { text-align: center; padding: 60px 32px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
-.primary { border: 0; border-radius: 12px; background: var(--accent); color: #FFFFFF; font-weight: 600; min-height: 48px; padding: 0 22px; font-size: 17px; }
-.secondary { border: 0; border-radius: 12px; background: var(--seg); color: var(--accent-text); font-weight: 600; min-height: 48px; padding: 0 22px; font-size: 17px; }
-.danger { border: 0; background: transparent; color: var(--down); min-height: 44px; font-size: 17px; width: 100%; text-align: left; padding: 0 16px; }
-.install-tip { margin: 0 16px 12px; padding: 12px 14px; border-radius: 12px; background: var(--card); font-size: 14px; line-height: 1.4; display: flex; gap: 10px; align-items: flex-start; }
+/* Actions */
+.actions { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin: 22px 14px 0; }
+.action { display: flex; flex-direction: column; align-items: center; gap: 7px; border: 0; background: transparent; padding: 0; color: var(--text); font-size: 12px; font-weight: 600; }
+.action .c { width: 54px; height: 54px; border-radius: 18px; background: var(--card); box-shadow: var(--shadow); display: flex; align-items: center; justify-content: center; color: var(--accent); transition: transform 0.15s; }
+.action:active .c { transform: scale(0.92); }
+.action.primary .c { background: var(--accent); color: #FFFFFF; }
+
+/* Sections & cards */
+.sec { display: flex; align-items: baseline; justify-content: space-between; padding: 28px 20px 10px; }
+.sec h2 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.2px; }
+.sec .more { border: 0; background: transparent; color: var(--accent); font-size: 15px; font-weight: 600; padding: 0; min-height: 32px; }
+.card { background: var(--card); border-radius: 20px; margin: 0 16px; box-shadow: var(--shadow); overflow: hidden; }
+.pad { padding: 16px 18px; }
+.note { padding: 10px 24px 0; font-size: 12.5px; color: var(--sub); line-height: 1.45; }
+.alert { display: flex; gap: 10px; align-items: flex-start; margin: 16px 16px 0; padding: 12px 14px; border-radius: 16px; background: var(--warn-soft); color: var(--warn); font-size: 14px; }
+
+/* Allocation */
+.alloc { margin: 0 16px; padding: 16px 18px; }
+.alloc-bar { display: flex; height: 10px; border-radius: 99px; overflow: hidden; gap: 2px; background: var(--card2); }
+.alloc-bar span { display: block; height: 100%; min-width: 3px; transition: width 0.6s ease; }
+.alloc-legend { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 12px; font-size: 13px; }
+.alloc-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.alloc-legend i { width: 8px; height: 8px; border-radius: 3px; display: inline-block; }
+
+/* Wallet cards */
+.wstrip { display: flex; gap: 12px; overflow-x: auto; padding: 2px 16px 14px; scroll-snap-type: x mandatory; scroll-padding: 16px; scrollbar-width: none; }
+.wstrip::-webkit-scrollbar { display: none; }
+.wcard { flex: 0 0 min(76%, 270px); scroll-snap-align: start; background: var(--card); border-radius: 20px; box-shadow: var(--shadow); padding: 16px; display: flex; flex-direction: column; gap: 10px; min-height: 148px; border: 0; text-align: left; color: var(--text); transition: transform 0.15s; }
+.wcard:active { transform: scale(0.98); }
+.wtop { display: flex; align-items: center; gap: 10px; }
+.wtop img, .wtop .cdot { width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0; background: var(--card2); }
+.wname { font-weight: 650; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wchain { font-size: 12px; color: var(--sub); }
+.wval { font-size: 24px; font-weight: 750; letter-spacing: -0.4px; margin-top: auto; }
+.wfoot { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.wfoot .mono { font-size: 11.5px; color: var(--faint); }
+.wcard.add { align-items: center; justify-content: center; color: var(--accent); font-weight: 650; background: transparent; box-shadow: none; border: 1.5px dashed var(--sep); flex-basis: 140px; }
+
+/* Rows */
+.row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; min-height: 68px; width: 100%; border: 0; background: transparent; text-align: left; color: var(--text); position: relative; }
+.row + .row::before { content: ""; position: absolute; top: 0; left: 68px; right: 16px; border-top: 1px solid var(--sep); }
+.row:active { background: var(--card2); }
+.row .m { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.row .nm { font-size: 16px; font-weight: 650; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row .sb { font-size: 13px; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row .e { display: flex; flex-direction: column; gap: 2px; align-items: flex-end; flex-shrink: 0; }
+.row .v { font-size: 16px; font-weight: 650; }
+.row .pc { font-size: 13px; font-weight: 600; }
+.spark { width: 54px; height: 26px; flex-shrink: 0; }
+.kv { display: flex; justify-content: space-between; align-items: center; padding: 0 18px; min-height: 50px; gap: 12px; }
+.kv + .kv { border-top: 1px solid var(--sep); }
+
+/* Logos */
+.logo { position: relative; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #FFFFFF; font-weight: 750; flex-shrink: 0; letter-spacing: -0.3px; }
+.logo .li { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: var(--card); }
+.logo .cb { position: absolute; right: -3px; bottom: -3px; width: 42%; height: 42%; border-radius: 50%; border: 2px solid var(--card); background: var(--card); object-fit: cover; }
+
+/* Stats grid */
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0 16px; }
+.stat { background: var(--card); border-radius: 18px; padding: 14px 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 4px; }
+.stat .k { font-size: 12.5px; color: var(--sub); font-weight: 600; }
+.stat .val { font-size: 19px; font-weight: 700; letter-spacing: -0.2px; }
+.stat .s2 { font-size: 13px; font-weight: 600; }
+
+/* Skeleton */
+.sk { display: inline-block; border-radius: 8px; background: linear-gradient(90deg, var(--sk) 25%, var(--sk2) 50%, var(--sk) 75%); background-size: 200% 100%; animation: shimmer 1.3s infinite linear; }
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+/* Empty / misc */
+.empty { text-align: center; padding: 48px 32px 20px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.empty .art { width: 84px; height: 84px; border-radius: 26px; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; }
+.btn { border: 0; border-radius: 14px; background: var(--accent); color: #FFFFFF; font-weight: 650; min-height: 50px; padding: 0 24px; font-size: 16px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.btn.alt { background: var(--accent-soft); color: var(--accent-text); }
+.btn:active { opacity: 0.85; }
+.danger { border: 0; background: transparent; color: var(--down); min-height: 50px; font-size: 16px; width: 100%; text-align: left; padding: 0 18px; }
+.tip { display: flex; gap: 12px; align-items: center; margin: 10px 16px 0; padding: 12px 14px; border-radius: 16px; background: var(--accent-soft); color: var(--accent-text); font-size: 14px; line-height: 1.4; }
+.foot { display: flex; gap: 7px; align-items: center; justify-content: center; padding: 22px 20px 0; font-size: 12px; color: var(--faint); }
+.addr-chip { display: inline-flex; align-items: center; gap: 6px; border: 0; background: var(--card2); color: var(--sub); border-radius: 99px; padding: 5px 10px; font-size: 12.5px; }
+
+/* Pull to refresh */
+#ptr { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 8px); width: 36px; height: 36px; margin-left: -18px; border-radius: 50%; background: var(--card); box-shadow: 0 2px 10px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; color: var(--accent); z-index: 30; transform: translateY(-60px); opacity: 0; pointer-events: none; }
 
 /* Sheets */
-.sheet-backdrop { position: fixed; inset: 0; background: var(--dim); z-index: 50; display: flex; align-items: flex-end; justify-content: center; animation: fade 0.2s ease; }
-.sheet { width: 100%; max-width: 560px; max-height: calc(100% - 40px - env(safe-area-inset-top)); background: var(--bg); border-radius: 12px 12px 0 0; display: flex; flex-direction: column; animation: up 0.25s ease; padding-bottom: env(safe-area-inset-bottom); }
-.sheet .grab { width: 36px; height: 5px; border-radius: 3px; background: var(--chev); margin: 6px auto 0; }
-.sheet .body { overflow-y: auto; padding-bottom: 24px; -webkit-overflow-scrolling: touch; }
-@keyframes up { from { transform: translateY(40px); opacity: 0.6; } to { transform: none; opacity: 1; } }
-@keyframes fade { from { opacity: 0; } }
-.field { display: block; padding: 0 16px; min-height: 44px; }
-.field + .field { border-top: 0.5px solid var(--sep); }
-.field input, .field select, .field textarea { width: 100%; border: 0; outline: 0; background: transparent; min-height: 44px; font-size: 17px; padding: 0; }
-.field textarea { resize: none; padding: 11px 0; font-family: ui-monospace, Menlo, monospace; font-size: 16px; line-height: 1.35; }
-.field-row { display: flex; align-items: center; gap: 8px; }
-.field-row select { appearance: none; -webkit-appearance: none; text-align: right; color: var(--sub); }
+.sheet-bg { position: fixed; inset: 0; background: var(--dim); z-index: 50; display: flex; align-items: flex-end; justify-content: center; animation: fadeIn 0.2s ease; }
+.sheet { width: 100%; max-width: 600px; max-height: calc(100% - 44px - env(safe-area-inset-top)); background: var(--bg); border-radius: 22px 22px 0 0; display: flex; flex-direction: column; animation: sheetUp 0.32s cubic-bezier(0.2, 0.8, 0.2, 1); padding-bottom: env(safe-area-inset-bottom); }
+@keyframes sheetUp { from { transform: translateY(60%); } }
+.sheet .grab { width: 38px; height: 5px; border-radius: 3px; background: var(--faint); opacity: 0.5; margin: 7px auto 0; }
+.sheet .bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; min-height: 48px; padding: 0 6px; }
+.sheet .bar .t { font-weight: 650; font-size: 17px; text-align: center; }
+.sheet .bar .rr { display: flex; justify-content: flex-end; }
+.sheet .body { overflow-y: auto; padding-bottom: 28px; -webkit-overflow-scrolling: touch; }
+.sh { padding: 22px 24px 8px; font-size: 13px; color: var(--sub); font-weight: 600; }
+.field { display: block; padding: 0 18px; min-height: 50px; }
+.field + .field { border-top: 1px solid var(--sep); }
+.field input, .field select, .field textarea { width: 100%; border: 0; outline: 0; background: transparent; min-height: 50px; font-size: 16px; padding: 0; }
+.field textarea { resize: none; padding: 14px 0; font-family: ui-monospace, Menlo, monospace; font-size: 15px; line-height: 1.4; }
+.frow { display: flex; align-items: center; gap: 8px; }
+.frow select { appearance: none; -webkit-appearance: none; text-align: right; color: var(--sub); }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.toggle { position: relative; width: 51px; height: 31px; flex-shrink: 0; }
-.toggle input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
-.toggle span { position: absolute; inset: 0; border-radius: 16px; background: var(--seg); transition: background 0.2s; pointer-events: none; }
-.toggle span::after { content: ""; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: transform 0.2s; }
-.toggle input:checked + span { background: #34C759; }
-.toggle input:checked + span::after { transform: translateX(20px); }
-.qr { background: #FFFFFF; padding: 12px; border-radius: 12px; width: 220px; height: 220px; }
+.tg { position: relative; width: 51px; height: 31px; flex-shrink: 0; }
+.tg input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.tg span { position: absolute; inset: 0; border-radius: 16px; background: var(--card2); transition: background 0.2s; pointer-events: none; }
+.tg span::after { content: ""; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: transform 0.2s; }
+.tg input:checked + span { background: #34C759; }
+.tg input:checked + span::after { transform: translateX(20px); }
+.qr { background: #FFFFFF; padding: 14px; border-radius: 18px; width: 228px; height: 228px; }
 .qr svg { width: 100%; height: 100%; display: block; }
-.toast { position: fixed; left: 50%; bottom: calc(30px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: rgba(40,40,40,0.92); color: #FFFFFF; padding: 10px 16px; border-radius: 20px; font-size: 14px; z-index: 90; animation: fade 0.2s; }
-
-/* Lock */
-.lock { position: fixed; inset: 0; z-index: 100; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 32px; text-align: center; }
+.toast { position: fixed; left: 50%; bottom: calc(28px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: rgba(24,26,32,0.94); color: #FFFFFF; padding: 11px 18px; border-radius: 99px; font-size: 14px; font-weight: 550; z-index: 90; animation: toastIn 0.25s ease; white-space: nowrap; box-shadow: 0 6px 20px rgba(0,0,0,0.25); }
+@keyframes toastIn { from { opacity: 0; transform: translate(-50%, 10px); } }
+.lock { position: fixed; inset: 0; z-index: 100; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 32px; text-align: center; }
 .lock h2 { margin: 0; font-size: 22px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
 </head>
 <body>
-<div class="wrap" id="main" aria-live="off"></div>
+<div id="ptr" aria-hidden="true"></div>
+<div class="wrap" id="main"></div>
 <div id="sheet-root"></div>
 <div id="lock-root"></div>
 <noscript><p style="padding: 24px">CryptoWatch needs JavaScript turned on.</p></noscript>
 <script src="qrcode.min.js"></script>
 <script>
 'use strict';
+const APP_VERSION = '4';
 
 // ---------- Icons ----------
+const sv = (d, s = 22, w = 2) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
 const I = {
-  gear: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
-  plus: '<svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="currentColor"/><path d="M12 7v10M7 12h10" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round"/></svg>',
-  refresh: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5"/></svg>',
-  back: '<svg width="12" height="20" viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2 2 10l8 8"/></svg>',
-  chev: '<svg class="chev" width="8" height="14" viewBox="0 0 8 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 1.5 6.5 7l-5 5.5"/></svg>',
-  wallet: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18M16 14.5h2"/></svg>',
-  copy: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>',
-  compass: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg>',
-  share: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>',
-  clip: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6"/></svg>',
-  warn: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;margin-top:1px"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></svg>',
-  hand: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0"><path d="M18 11V6a2 2 0 0 0-4 0v5M14 10V4a2 2 0 0 0-4 0v6M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.9-6-2.4l-3.6-3.6a2 2 0 0 1 2.8-2.8L7 15"/></svg>',
-  lock: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
-  shareIos: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px"><path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>',
-  a: (d) => `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`,
+  gear: sv('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>', 22, 1.8),
+  plus: sv('<path d="M12 5v14M5 12h14"/>', 24, 2.2),
+  refresh: sv('<path d="M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5"/>', 21),
+  back: sv('<path d="m15 18-6-6 6-6"/>', 26, 2.4),
+  chev: sv('<path d="m9 18 6-6-6-6"/>', 18, 2.2),
+  eye: sv('<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>', 16),
+  eyeOff: sv('<path d="M9.9 4.2A10 10 0 0 1 12 4c6.4 0 10 8 10 8a17 17 0 0 1-2.2 3.2M6.6 6.6A17 17 0 0 0 2 12s3.6 8 10 8a9.7 9.7 0 0 0 5.4-1.6M2 2l20 20M9.9 9.9a3 3 0 0 0 4.2 4.2"/>', 16),
+  copy: sv('<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>', 15),
+  ext: sv('<path d="M14 4h6v6M20 4 10 14M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>', 18),
+  share: sv('<path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/>', 18),
+  clip: sv('<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6"/>', 22, 1.8),
+  warn: sv('<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/>', 18),
+  hand: sv('<path d="M18 11V6a2 2 0 0 0-4 0v5M14 10V4a2 2 0 0 0-4 0v6M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.9-6-2.4l-3.6-3.6a2 2 0 0 1 2.8-2.8L7 15"/>', 22),
+  lock: sv('<rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>', 40, 1.8),
+  wallet: sv('<rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10h18M16 14.5h2"/>', 40, 1.8),
+  shareIos: sv('<path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/>', 17),
+  close: sv('<path d="M18 6 6 18M6 6l12 12"/>', 18),
+  up: sv('<path d="M7 17 17 7M9 7h8v8"/>', 13, 2.6),
+  down: sv('<path d="M7 7l10 10M17 9v8H9"/>', 13, 2.6),
+  buy: sv('<path d="M12 5v14M5 12h14"/>', 23, 2.2),
+  sell: sv('<path d="M5 12h14"/>', 23, 2.2),
+  swap: sv('<path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/>', 22, 2.1),
+  send: sv('<path d="M7 17 17 7M9 7h8v8"/>', 22, 2.2),
+  recv: sv('<path d="M17 7 7 17M15 17H7V9"/>', 22, 2.2),
 };
 
-// ---------- Chains ----------
+// ---------- Chains & logos ----------
 const CHAINS = {
-  bitcoin:  { name: 'Bitcoin', sym: 'BTC', native: 'coingecko:bitcoin', coin: 'Bitcoin', color: '#E8820C', tag: ['#9A5200', '#FDF0E1'], kind: 'utxo', api: 'https://mempool.space/api', explorer: 'https://mempool.space/address/', ph: 'bc1q… / 1… / 3…' },
-  ethereum: { name: 'Ethereum', sym: 'ETH', native: 'coingecko:ethereum', coin: 'Ethereum', color: '#5856D6', tag: ['#3A3AA8', '#E8E8F8'], kind: 'evm', llama: 'ethereum', rpc: 'https://ethereum-rpc.publicnode.com', explorer: 'https://etherscan.io/address/', ph: '0x…',
+  bitcoin:  { name: 'Bitcoin', sym: 'BTC', native: 'coingecko:bitcoin', coin: 'Bitcoin', color: '#F7931A', icon: 'bitcoin', kind: 'utxo', api: 'https://mempool.space/api', explorer: 'https://mempool.space/address/', ph: 'bc1q… / 1… / 3…' },
+  ethereum: { name: 'Ethereum', sym: 'ETH', native: 'coingecko:ethereum', coin: 'Ethereum', color: '#627EEA', icon: 'ethereum', kind: 'evm', llama: 'ethereum', rpc: 'https://ethereum-rpc.publicnode.com', explorer: 'https://etherscan.io/address/', ph: '0x…',
     tokens: ['0xdac17f958d2ee523a2206206994597c13d831ec7', '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599', '0x6b175474e89094c44da98b954eedeac495271d0f'] },
-  solana:   { name: 'Solana', sym: 'SOL', native: 'coingecko:solana', coin: 'Solana', color: '#1F9E8A', tag: ['#11685B', '#DDF3EF'], kind: 'sol', rpc: 'https://solana-rpc.publicnode.com', explorer: 'https://solscan.io/account/', ph: 'Solana address' },
-  base:     { name: 'Base', sym: 'ETH', native: 'coingecko:ethereum', coin: 'Ethereum', color: '#007AFF', tag: ['#0057B8', '#E0EEFF'], kind: 'evm', llama: 'base', rpc: 'https://base-rpc.publicnode.com', explorer: 'https://basescan.org/address/', ph: '0x…',
+  solana:   { name: 'Solana', sym: 'SOL', native: 'coingecko:solana', coin: 'Solana', color: '#9945FF', icon: 'solana', kind: 'sol', rpc: 'https://solana-rpc.publicnode.com', explorer: 'https://solscan.io/account/', ph: 'Solana address' },
+  base:     { name: 'Base', sym: 'ETH', native: 'coingecko:ethereum', coin: 'Ethereum', color: '#0052FF', icon: 'base', kind: 'evm', llama: 'base', rpc: 'https://base-rpc.publicnode.com', explorer: 'https://basescan.org/address/', ph: '0x…',
     tokens: ['0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', '0x4200000000000000000000000000000000000006', '0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf'] },
-  arbitrum: { name: 'Arbitrum', sym: 'ETH', native: 'coingecko:ethereum', coin: 'Ethereum', color: '#1B8FB5', tag: ['#0B6A88', '#E0F3FA'], kind: 'evm', llama: 'arbitrum', rpc: 'https://arbitrum-one-rpc.publicnode.com', explorer: 'https://arbiscan.io/address/', ph: '0x…',
+  arbitrum: { name: 'Arbitrum', sym: 'ETH', native: 'coingecko:ethereum', coin: 'Ethereum', color: '#28A0F0', icon: 'arbitrum', kind: 'evm', llama: 'arbitrum', rpc: 'https://arbitrum-one-rpc.publicnode.com', explorer: 'https://arbiscan.io/address/', ph: '0x…',
     tokens: ['0xaf88d065e77c8cc2239327c5edb3a432268e5831', '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9', '0x82af49447d8a07e3bd95bd0d56f35241523fbab1', '0x912ce59144191c1204e64559fe8253a0e49e6548'] },
-  optimism: { name: 'Optimism', sym: 'ETH', native: 'coingecko:ethereum', coin: 'Ethereum', color: '#E0302B', tag: ['#B0201C', '#FCE6E5'], kind: 'evm', llama: 'optimism', rpc: 'https://optimism-rpc.publicnode.com', explorer: 'https://optimistic.etherscan.io/address/', ph: '0x…',
+  optimism: { name: 'Optimism', sym: 'ETH', native: 'coingecko:ethereum', coin: 'Ethereum', color: '#FF0420', icon: 'optimism', kind: 'evm', llama: 'optimism', rpc: 'https://optimism-rpc.publicnode.com', explorer: 'https://optimistic.etherscan.io/address/', ph: '0x…',
     tokens: ['0x0b2c639c533813f4aa9d7837caf62653d097ff85', '0x4200000000000000000000000000000000000006', '0x4200000000000000000000000000000000000042'] },
-  polygon:  { name: 'Polygon', sym: 'POL', native: 'coingecko:polygon-ecosystem-token', coin: 'Polygon', color: '#8247E5', tag: ['#6232B8', '#F0E8FC'], kind: 'evm', llama: 'polygon', rpc: 'https://polygon-bor-rpc.publicnode.com', explorer: 'https://polygonscan.com/address/', ph: '0x…',
+  polygon:  { name: 'Polygon', sym: 'POL', native: 'coingecko:polygon-ecosystem-token', coin: 'Polygon', color: '#8247E5', icon: 'polygon', kind: 'evm', llama: 'polygon', rpc: 'https://polygon-bor-rpc.publicnode.com', explorer: 'https://polygonscan.com/address/', ph: '0x…',
     tokens: ['0x3c499c542cef5e3811e1192ce70d8cc03d5c3359', '0xc2132d05d31c914a87c6611c10748aeb04b58e8f', '0x7ceb23fd6bc0add59e62ac25578270cff1b9f619'] },
-  bsc:      { name: 'BNB Chain', sym: 'BNB', native: 'coingecko:binancecoin', coin: 'BNB', color: '#C99400', tag: ['#7A5A00', '#FBF1D6'], kind: 'evm', llama: 'bsc', rpc: 'https://bsc-rpc.publicnode.com', explorer: 'https://bscscan.com/address/', ph: '0x…',
+  bsc:      { name: 'BNB Chain', sym: 'BNB', native: 'coingecko:binancecoin', coin: 'BNB', color: '#F0B90B', icon: 'binance', kind: 'evm', llama: 'bsc', rpc: 'https://bsc-rpc.publicnode.com', explorer: 'https://bscscan.com/address/', ph: '0x…',
     tokens: ['0x55d398326f99059ff775485246999027b3197955', '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d', '0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c', '0x2170ed0880ac9a755fd29b2688956bd959f933f8'] },
-  litecoin: { name: 'Litecoin', sym: 'LTC', native: 'coingecko:litecoin', coin: 'Litecoin', color: '#7A7A80', tag: ['#55555A', '#EDEDF0'], kind: 'utxo', api: 'https://litecoinspace.org/api', explorer: 'https://litecoinspace.org/address/', ph: 'ltc1… / L… / M…' },
+  litecoin: { name: 'Litecoin', sym: 'LTC', native: 'coingecko:litecoin', coin: 'Litecoin', color: '#345D9D', icon: 'litecoin', kind: 'utxo', api: 'https://litecoinspace.org/api', explorer: 'https://litecoinspace.org/address/', ph: 'ltc1… / L… / M…' },
 };
+const chainIcon = (c) => `https://icons.llamao.fi/icons/chains/rsz_${CHAINS[c].icon}.jpg`;
+const CG = 'https://assets.coingecko.com/coins/images/';
+const KNOWN_ICONS = (() => {
+  const m = {
+    'coingecko:bitcoin': chainIcon('bitcoin'), 'coingecko:ethereum': chainIcon('ethereum'), 'coingecko:solana': chainIcon('solana'),
+    'coingecko:litecoin': chainIcon('litecoin'), 'coingecko:polygon-ecosystem-token': chainIcon('polygon'), 'coingecko:binancecoin': chainIcon('bsc'),
+  };
+  const set = (url, keys) => keys.forEach((k) => { m[k] = url; });
+  set(CG + '6319/small/usdc.png', ['ethereum:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', 'base:0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', 'arbitrum:0xaf88d065e77c8cc2239327c5edb3a432268e5831', 'optimism:0x0b2c639c533813f4aa9d7837caf62653d097ff85', 'polygon:0x3c499c542cef5e3811e1192ce70d8cc03d5c3359', 'bsc:0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d']);
+  set(CG + '325/small/Tether.png', ['ethereum:0xdac17f958d2ee523a2206206994597c13d831ec7', 'arbitrum:0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9', 'polygon:0xc2132d05d31c914a87c6611c10748aeb04b58e8f', 'bsc:0x55d398326f99059ff775485246999027b3197955']);
+  set(CG + '2518/small/weth.png', ['ethereum:0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', 'base:0x4200000000000000000000000000000000000006', 'optimism:0x4200000000000000000000000000000000000006', 'arbitrum:0x82af49447d8a07e3bd95bd0d56f35241523fbab1', 'polygon:0x7ceb23fd6bc0add59e62ac25578270cff1b9f619']);
+  set(CG + '7598/small/wrapped_bitcoin_wbtc.png', ['ethereum:0x2260fac5e5542a773aa44fbcfedf7c193bc2c599']);
+  set(CG + '9956/small/Badge_Dai.png', ['ethereum:0x6b175474e89094c44da98b954eedeac495271d0f']);
+  set(CG + '40143/small/cbbtc.webp', ['base:0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf']);
+  set(CG + '16547/small/arb.jpg', ['arbitrum:0x912ce59144191c1204e64559fe8253a0e49e6548']);
+  set(CG + '25244/small/Optimism.png', ['optimism:0x4200000000000000000000000000000000000042']);
+  set(CG + '14108/small/Binance-bitcoin.png', ['bsc:0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c']);
+  set(chainIcon('ethereum'), ['bsc:0x2170ed0880ac9a755fd29b2688956bd959f933f8']);
+  return m;
+})();
+const BRAND = { BTC: '#F7931A', ETH: '#627EEA', WETH: '#627EEA', SOL: '#9945FF', USDC: '#2775CA', USDT: '#26A17B', BNB: '#F0B90B', POL: '#8247E5', LTC: '#345D9D', DAI: '#F5AC37', WBTC: '#F09242', CBBTC: '#0052FF', ARB: '#28A0F0', OP: '#FF0420' };
+function colorFor(sym) {
+  const s = (sym || '?').toUpperCase(); if (BRAND[s]) return BRAND[s];
+  const pal = ['#C8650A', '#2E6FD8', '#7B3FC4', '#C2185B', '#00838F', '#5856D6', '#2E7D32', '#C62828', '#1F8A79', '#0277BD', '#6D4C41'];
+  let h = 0; for (const ch of s) h = (h * 31 + ch.codePointAt(0)) & 0x7fffffff;
+  return pal[h % pal.length];
+}
+
 const PERIODS = ['1h', '24h', '7d', '30d'];
+const PERIOD_LABEL = { '1h': 'Past hour', '24h': 'Past 24 hours', '7d': 'Past week', '30d': 'Past month' };
+const CHART_CFG = {
+  '1h':  { range: 3600, span: 12, step: '5m', ttl: 120e3 },
+  '24h': { range: 86400, span: 48, step: '30m', ttl: 300e3 },
+  '7d':  { range: 604800, span: 42, step: '4h', ttl: 600e3 },
+  '30d': { range: 2592000, span: 30, step: '1d', ttl: 1800e3 },
+};
 const LLAMA = 'https://coins.llama.fi';
-const PRICE_EVERY = 30e3, BAL_EVERY = 120e3, CHART_EVERY = 600e3;
+const PRICE_EVERY = 30e3, BAL_EVERY = 120e3;
 
 // ---------- State ----------
 function load(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } }
 function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* storage full or blocked */ } }
-
 const S = {
-  wallets: load('cw.wallets', []),
-  period: load('cw.period', '24h'),
-  hideSmall: load('cw.hideSmall', true),
-  lockId: load('cw.lockId', null),
-  raw: {}, prices: {}, changes: {}, charts: {}, errors: {},
-  priceError: null, lastUpdated: null, refreshing: false, lastBal: 0, lastChart: 0,
-  unlocked: false,
+  wallets: load('cw.wallets', []), period: load('cw.period', '24h'), hideSmall: load('cw.hideSmall', true),
+  hide: load('cw.hideAmounts', false), lockId: load('cw.lockId', null),
+  raw: {}, prices: {}, changes: {}, charts: { '1h': {}, '24h': {}, '7d': {}, '30d': {} }, chartAt: {}, icons: {}, meta: {},
+  errors: {}, priceError: null, lastUpdated: null, refreshing: false, spinning: false, refreshStarted: 0, lastBal: 0, unlocked: false,
 };
 (() => {
-  const c = load('cw.cache', null);
-  if (c) { S.raw = c.raw || {}; S.prices = c.prices || {}; S.changes = c.changes || {}; S.charts = c.charts || {}; S.lastUpdated = c.lastUpdated || null; }
+  const c = load('cw.cache', null); if (!c) return;
+  S.raw = c.raw || {}; S.prices = c.prices || {}; S.changes = c.changes || {}; S.lastUpdated = c.lastUpdated || null;
+  S.icons = c.icons || {}; S.meta = c.meta || {};
+  if (c.charts && c.charts['7d']) Object.assign(S.charts, c.charts); // older versions stored a flat 7-day map; ignore it
 })();
-function saveCache() { save('cw.cache', { raw: S.raw, prices: S.prices, changes: S.changes, charts: S.charts, lastUpdated: S.lastUpdated }); }
+if (!PERIODS.includes(S.period)) S.period = '24h';
+function saveCache() { save('cw.cache', { raw: S.raw, prices: S.prices, changes: S.changes, charts: S.charts, lastUpdated: S.lastUpdated, icons: S.icons, meta: S.meta }); }
 function saveWallets() { save('cw.wallets', S.wallets); }
 
 // ---------- Formatting ----------
@@ -209,34 +340,41 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '
 function usd(v) {
   const a = Math.abs(v);
   if (a > 0 && a < 0.01) return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumSignificantDigits: 3 }).format(v);
-  const max = a === 0 ? 2 : a < 1 ? 4 : 2;
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: Math.min(2, max), maximumFractionDigits: max }).format(v);
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: a < 1 && a > 0 ? 4 : 2 }).format(v);
 }
-const sUsd = (v) => (v >= 0 ? '+' : '−') + usd(Math.abs(v));
-const pct = (v) => (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2) + '%';
-const amt = (v) => new Intl.NumberFormat('en-US', { maximumFractionDigits: v >= 1000 ? 2 : v >= 1 ? 4 : 8 }).format(v);
+const amt = (v) => new Intl.NumberFormat('en-US', { maximumFractionDigits: v >= 1000 ? 2 : v >= 1 ? 4 : 6 }).format(v);
 const short = (a) => a.length > 14 ? a.slice(0, 6) + '…' + a.slice(-4) : a;
-const dir = (v) => v >= 0 ? 'up' : 'down';
-function pill(p) { return p == null ? '<span class="pill none">—</span>' : `<span class="pill ${dir(p)} num">${pct(p)}</span>`; }
-function badgeColor(sym) {
-  const pal = ['#C8650A', '#2E6FD8', '#7B3FC4', '#C2185B', '#00838F', '#5856D6', '#2E7D32', '#C62828', '#1F8A79', '#0277BD', '#6D4C41'];
-  let h = 0; for (const ch of sym) h = (h * 31 + ch.codePointAt(0)) & 0x7fffffff;
-  return pal[h % pal.length];
+const dir = (v) => (v >= 0 ? 'up' : 'down');
+const MASK = '••••••';
+const MONEY = new Set(['usd', 'usdAbs']);
+function fmtN(v, f) {
+  if (S.hide && MONEY.has(f)) return MASK;
+  switch (f) {
+    case 'usd': return usd(v);
+    case 'usdAbs': return usd(Math.abs(v));
+    case 'price': return usd(v);
+    case 'pctAbs': return Math.abs(v).toFixed(2) + '%';
+    case 'pct': return (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2) + '%';
+    case 'amt': return S.hide ? '••••' : amt(v);
+    default: return String(v);
+  }
 }
-function badge(sym, size) {
-  const t = sym.length > 4 ? sym.slice(0, 3) : sym;
-  const s = size ? `width:${size}px;height:${size}px;font-size:${Math.round(size * 0.3)}px` : '';
-  return `<span class="badge" style="background:${badgeColor(sym)};${s}" aria-hidden="true">${esc(t)}</span>`;
+const num = (k, v, f) => `<span class="n" data-k="${esc(k)}" data-v="${v}" data-f="${f}">${esc(fmtN(v, f))}</span>`;
+function chip(c, k, cls = '') {
+  if (!c) return `<span class="chip flat ${cls}">—</span>`;
+  return `<span class="chip ${dir(c.amount ?? c.pct)} ${cls}">${(c.amount ?? c.pct) >= 0 ? I.up : I.down}${c.amount != null ? `${num(k + ':a', c.amount, 'usdAbs')} · ` : ''}${num(k + ':p', c.pct, 'pctAbs')}</span>`;
 }
-const chainTag = (c) => `<span class="tag" style="color:${CHAINS[c].tag[0]};background:${CHAINS[c].tag[1]}">${esc(CHAINS[c].name)}</span>`;
+function logo(h, size = 40) {
+  const sym = h.symbol || '?', letters = esc(sym.slice(0, sym.length > 4 ? 3 : 4));
+  const url = S.icons[h.key] || KNOWN_ICONS[h.key];
+  return `<span class="logo" style="width:${size}px;height:${size}px;background:${colorFor(sym)};font-size:${Math.round(size * (letters.length > 3 ? 0.24 : 0.3))}px" aria-hidden="true">${letters}${url ? `<img class="li" src="${esc(url)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}${h.chain ? `<img class="cb" src="${chainIcon(h.chain)}" alt="" loading="lazy" onerror="this.remove()">` : ''}</span>`;
+}
+const sk = (w, h = 14) => `<span class="sk" style="width:${w}px;height:${h}px"></span>`;
 
 // ---------- Networking ----------
-// Every request (including reading the reply) has a hard time limit, so one stalled server
-// can't freeze refreshing. Promise.race guarantees we move on even if abort() is ignored.
-const APP_VERSION = '3';
+// Every request (including reading the reply) has a hard time limit, so a stalled server can't freeze refreshing.
 function fetchJSON(url, opts, ms = 10000) {
-  const host = new URL(url).host;
-  const ctrl = new AbortController();
+  const host = new URL(url).host, ctrl = new AbortController();
   let timer;
   const timeout = new Promise((_, reject) => { timer = setTimeout(() => { ctrl.abort(); reject(new Error(`${host} took too long`)); }, ms); });
   const work = (async () => {
@@ -287,7 +425,9 @@ async function fetchHoldings(w) {
         const contract = (t.address_hash || t.address || '').toLowerCase();
         const raw = Number(b.value);
         if (t.type !== 'ERC-20' || t.exchange_rate == null || (t.reputation && t.reputation !== 'ok') || !contract || !(raw > 0)) continue;
-        out.push({ key: `ethereum:${contract}`, amount: raw / 10 ** Number(t.decimals || 18), symbol: t.symbol, name: t.name, native: false });
+        const key = `ethereum:${contract}`;
+        out.push({ key, amount: raw / 10 ** Number(t.decimals || 18), symbol: t.symbol, name: t.name, native: false });
+        if (t.icon_url && !S.icons[key]) S.icons[key] = t.icon_url;
         found.add(contract);
       }
     } catch (e) { /* discovery is best effort */ }
@@ -323,17 +463,32 @@ const fetchChanges = (keys, p) => chunked(keys, 50, async (j) => {
   for (const k in c) if (typeof c[k] === 'number') o[k] = c[k];
   return o;
 });
-// DefiLlama allows at most 500 points per request: 42 points x 11 coins = 462.
-async function fetchCharts(keys) {
-  const u = [...new Set(keys)].sort(), start = Math.floor(Date.now() / 1000) - 7 * 86400, out = {};
-  const groups = []; for (let i = 0; i < u.length; i += 11) groups.push(u.slice(i, i + 11).join(','));
+// DefiLlama allows at most 500 points per request, so batch size depends on the period's span.
+async function fetchCharts(keys, period) {
+  const cfg = CHART_CFG[period], per = Math.floor(480 / cfg.span);
+  const u = [...new Set(keys)].sort(), start = Math.floor(Date.now() / 1000) - cfg.range, out = {};
+  const groups = []; for (let i = 0; i < u.length; i += per) groups.push(u.slice(i, i + per).join(','));
   await Promise.all(groups.map(async (j) => {
     try {
-      const c = (await getJSON(`${LLAMA}/chart/${j}?start=${start}&span=42&period=4h`)).coins;
+      const c = (await getJSON(`${LLAMA}/chart/${j}?start=${start}&span=${cfg.span}&period=${cfg.step}`)).coins;
       for (const k in c) out[k] = c[k].prices.map((p) => [p.timestamp, p.price]);
     } catch (e) { /* skip this batch; others still show */ }
   }));
   return out;
+}
+// Real names + logos for Solana tokens (DefiLlama only knows prices).
+async function fetchSolanaMeta(keys) {
+  const mints = keys.filter((k) => k.startsWith('solana:') && !S.meta[k]).map((k) => k.slice(7)).slice(0, 60);
+  if (!mints.length) return;
+  try {
+    const list = await getJSON(`https://lite-api.jup.ag/tokens/v2/search?query=${mints.join(',')}`);
+    for (const t of list) {
+      const k = 'solana:' + t.id;
+      S.meta[k] = { symbol: t.symbol, name: t.name };
+      if (t.icon && !S.icons[k]) S.icons[k] = t.icon;
+    }
+    mints.forEach((m) => { if (!S.meta['solana:' + m]) S.meta['solana:' + m] = {}; });
+  } catch (e) { /* optional */ }
 }
 
 // ---------- Refresh ----------
@@ -345,7 +500,16 @@ async function refreshBalances(only) {
   }));
   if (!only) S.lastBal = Date.now();
 }
-async function refreshPrices(forceCharts) {
+async function refreshCharts(period, force) {
+  const keys = allAssets().slice(0, 40).map((a) => a.key);
+  if (!keys.length) return;
+  const have = S.charts[period] || {};
+  const missing = keys.some((k) => !have[k]);
+  if (!force && !missing && Date.now() - (S.chartAt[period] || 0) < CHART_CFG[period].ttl) return;
+  const fresh = await fetchCharts(keys, period);
+  S.charts[period] = { ...have, ...fresh }; S.chartAt[period] = Date.now();
+}
+async function refreshPrices(force) {
   const keys = new Set(); S.wallets.forEach((w) => { keys.add(CHAINS[w.chain].native); (S.raw[w.id] || []).forEach((h) => keys.add(h.key)); });
   const list = [...keys]; if (!list.length) return;
   try {
@@ -353,24 +517,14 @@ async function refreshPrices(forceCharts) {
     S.prices = p; PERIODS.forEach((x, i) => { S.changes[x] = ch[i]; });
     S.priceError = null; S.lastUpdated = Date.now();
   } catch (e) { S.priceError = 'Prices: ' + (e.message || e); }
-  if (forceCharts || Date.now() - S.lastChart > CHART_EVERY) {
-    try {
-      const top = allAssets().slice(0, 40).map((a) => a.key);
-      if (top.length) { Object.assign(S.charts, await fetchCharts(top)); S.lastChart = Date.now(); }
-    } catch (e) { /* charts are optional */ }
-  }
+  await Promise.all([refreshCharts(S.period, force).catch(() => {}), fetchSolanaMeta(allAssets().map((a) => a.key))]);
 }
 let refreshRun = 0;
 async function refresh(force, manual) {
-  // A refresh stuck for over 45s (e.g. the phone suspended it) is abandoned so a new one can start.
-  if (S.refreshing && Date.now() - S.refreshStarted < 45e3) {
-    if (manual) toast('Already updating…');
-    return;
-  }
+  if (S.refreshing && Date.now() - S.refreshStarted < 45e3) { if (manual) toast('Already updating…'); return; }
   const run = ++refreshRun;
   S.refreshing = true; S.refreshStarted = Date.now();
   if (manual) { S.spinning = true; renderMain(); }
-  // The button never spins for more than 25 seconds, whatever happens.
   const spinGuard = manual ? setTimeout(() => { S.spinning = false; renderMain(); }, 25e3) : null;
   try {
     if (force || Date.now() - S.lastBal > BAL_EVERY) await refreshBalances();
@@ -378,7 +532,7 @@ async function refresh(force, manual) {
     if (run === refreshRun) saveCache();
     if (manual && run === refreshRun) {
       const errs = Object.keys(S.errors).length;
-      toast(S.priceError ? "Couldn't reach the price service" : errs ? `Updated (${errs} wallet${errs > 1 ? 's' : ''} couldn't refresh)` : 'Updated');
+      toast(S.priceError ? "Couldn't reach the price service" : errs ? `Updated · ${errs} wallet${errs > 1 ? 's' : ''} couldn't refresh` : 'Updated just now');
     }
   } catch (e) {
     if (manual) toast('Refresh failed — try again');
@@ -387,7 +541,6 @@ async function refresh(force, manual) {
     if (run === refreshRun) { S.refreshing = false; S.spinning = false; renderMain(); }
   }
 }
-// Next automatic update starts 30s after the previous one finishes, so they can never pile up.
 let timer = null;
 function startLoop() {
   clearTimeout(timer);
@@ -398,10 +551,11 @@ function startLoop() {
 function priced(r, chain) {
   const info = S.prices[r.key]; if (!info) return null;
   if (!r.native && info.confidence != null && info.confidence < 0.8) return null;
-  const symbol = r.symbol || (info.symbol || '?').toUpperCase();
-  return { key: r.key, symbol, name: r.name || symbol, chain: r.native ? null : chain, amount: r.amount, price: info.price, value: r.amount * info.price };
+  const meta = S.meta[r.key] || {};
+  const symbol = r.symbol || meta.symbol || (info.symbol || '?').toUpperCase();
+  return { key: r.key, symbol, name: r.name || meta.name || symbol, chain: r.native ? null : chain, amount: r.amount, price: info.price, value: r.amount * info.price };
 }
-const visible = (h) => S.hideSmall ? h.value >= 1 : h.amount > 0;
+const visible = (h) => (S.hideSmall ? h.value >= 1 : h.amount > 0);
 function walletHoldings(w) { return (S.raw[w.id] || []).map((r) => priced(r, w.chain)).filter(Boolean).filter(visible).sort((a, b) => b.value - a.value); }
 function allAssets() {
   const m = {};
@@ -418,166 +572,287 @@ function totalChange(hs, p) {
   return before > 0 ? { amount: now - before, pct: (now / before - 1) * 100 } : null;
 }
 const total = (hs) => hs.reduce((s, h) => s + h.value, 0);
-// Portfolio value over 7 days at current amounts. Each coin's series is matched to the
-// nearest timestamp of the longest series (batches come back with slightly different times).
-// Coins without a chart are added at their current value so the curve ends at the real total.
-function valueHistory(hs) {
-  const series = [], flat = [];
-  hs.forEach((h) => { const s = S.charts[h.key]; (s && s.length > 1 ? series : flat).push([h, s]); });
+// Value over the selected period at current amounts; each series is matched to the nearest timestamp.
+function valueHistory(hs, period) {
+  const charts = S.charts[period] || {}, series = [], flat = [];
+  hs.forEach((h) => { const s = charts[h.key]; (s && s.length > 1 ? series : flat).push([h, s]); });
   if (!series.length) return [];
   const ref = series.reduce((a, b) => (b[1].length > a[1].length ? b : a))[1];
   const base = flat.reduce((sum, [h]) => sum + h.value, 0);
-  return ref.map(([t]) => [t, series.reduce((sum, [h, s]) => {
+  const pts = ref.map(([t]) => [t, series.reduce((sum, [h, s]) => {
     let best = s[0]; for (const p of s) if (Math.abs(p[0] - t) < Math.abs(best[0] - t)) best = p;
     return sum + best[1] * h.amount;
   }, base)]);
+  pts.push([Date.now() / 1000, total(hs)]); // end on the live value
+  return pts;
+}
+function priceHistory(key, period) {
+  const s = (S.charts[period] || {})[key]; if (!s || s.length < 2) return [];
+  const p = S.prices[key]?.price; return p != null ? [...s, [Date.now() / 1000, p]] : s;
 }
 
 // ---------- Charts ----------
-function linePath(pts, w, h, pad) {
+const CHARTS = new Map();
+function scale(pts, w, h, pad) {
   const ys = pts.map((p) => p[1]); let lo = Math.min(...ys), hi = Math.max(...ys);
-  if (hi === lo) { hi += 1; lo -= 1; }
-  return pts.map((p, i) => `${i ? 'L' : 'M'}${(i / (pts.length - 1) * w).toFixed(1)} ${(pad + (1 - (p[1] - lo) / (hi - lo)) * (h - 2 * pad)).toFixed(1)}`).join(' ');
+  if (hi === lo) { hi += Math.abs(hi) * 0.01 || 1; lo -= Math.abs(lo) * 0.01 || 1; }
+  const t0 = pts[0][0], t1 = pts[pts.length - 1][0] || t0 + 1;
+  return { x: (t) => ((t - t0) / (t1 - t0 || 1)) * w, y: (v) => pad + (1 - (v - lo) / (hi - lo)) * (h - 2 * pad) };
 }
-function chart(pts, h) {
-  if (!pts || pts.length < 2) return `<div class="chart-empty" style="height:${h}px">Chart loading…</div>`;
-  const w = 300, d = linePath(pts, w, h, 6), c = pts[pts.length - 1][1] >= pts[0][1] ? 'var(--up)' : 'var(--down)';
-  return `<svg class="chart" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" style="height:${h}px" aria-hidden="true"><path d="${d} L${w} ${h} L0 ${h} Z" fill="${c}" fill-opacity="0.13"/><path d="${d}" fill="none" stroke="${c}" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+function chartBlock(id, pts, h, hero) {
+  if (!pts || pts.length < 2) return `<div class="sk chart-sk" style="height:${h}px;display:block"></div>`;
+  const W = 1000, sc = scale(pts, W, h, 10);
+  const d = pts.map((p, i) => `${i ? 'L' : 'M'}${sc.x(p[0]).toFixed(1)} ${sc.y(p[1]).toFixed(1)}`).join(' ');
+  const up = pts[pts.length - 1][1] >= pts[0][1], col = up ? 'var(--up)' : 'var(--down)', y0 = sc.y(pts[0][1]).toFixed(1);
+  const gid = 'g' + id.replace(/[^a-zA-Z0-9_-]/g, '_');
+  CHARTS.set(id, { pts, h, sc, hero, col });
+  return `<div class="chart" data-chart="${esc(id)}" style="height:${h}px">
+    <svg viewBox="0 0 ${W} ${h}" preserveAspectRatio="none" aria-hidden="true">
+      <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:${col};stop-opacity:0.22"/><stop offset="1" style="stop-color:${col};stop-opacity:0"/></linearGradient></defs>
+      <path d="M0 ${y0} H${W}" stroke="var(--faint)" stroke-width="1" stroke-dasharray="3 5" vector-effect="non-scaling-stroke" opacity="0.6"/>
+      <path d="${d} L${W} ${h} L0 ${h} Z" fill="url(#${gid})"/>
+      <path d="${d}" fill="none" stroke="${col}" stroke-width="2.2" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/>
+    </svg><div class="sl"></div><div class="sd" style="background:${col}"></div></div>`;
 }
-function spark(pts) {
+function spark(key) {
+  const pts = (S.charts[S.period] || {})[key];
   if (!pts || pts.length < 2) return '<span class="spark"></span>';
-  const c = pts[pts.length - 1][1] >= pts[0][1] ? 'var(--up)' : 'var(--down)';
-  return `<svg class="spark" viewBox="0 0 52 24" preserveAspectRatio="none" aria-hidden="true"><path d="${linePath(pts, 52, 24, 2)}" fill="none" stroke="${c}" stroke-width="1.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>`;
+  const sc = scale(pts, 54, 26, 3), col = pts[pts.length - 1][1] >= pts[0][1] ? 'var(--up)' : 'var(--down)';
+  return `<svg class="spark" viewBox="0 0 54 26" preserveAspectRatio="none" aria-hidden="true"><path d="${pts.map((p, i) => `${i ? 'L' : 'M'}${sc.x(p[0]).toFixed(1)} ${sc.y(p[1]).toFixed(1)}`).join(' ')}" fill="none" stroke="${col}" stroke-width="1.6" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+}
+function scrubLabel(t) {
+  const d = new Date(t * 1000);
+  const o = S.period === '30d' ? { month: 'short', day: 'numeric' } : S.period === '7d' ? { weekday: 'short', hour: 'numeric' } : { hour: 'numeric', minute: '2-digit' };
+  return new Intl.DateTimeFormat('en-US', o).format(d);
+}
+function attachCharts(root) {
+  root.querySelectorAll('[data-chart]').forEach((el) => {
+    const c = CHARTS.get(el.dataset.chart); if (!c) return;
+    const line = el.querySelector('.sl'), dot = el.querySelector('.sd');
+    let saved = null;
+    const at = (clientX) => {
+      const r = el.getBoundingClientRect(), fx = Math.min(1, Math.max(0, (clientX - r.left) / r.width));
+      const tx = c.pts[0][0] + fx * (c.pts[c.pts.length - 1][0] - c.pts[0][0]);
+      let best = c.pts[0]; for (const p of c.pts) if (Math.abs(p[0] - tx) < Math.abs(best[0] - tx)) best = p;
+      const px = (c.sc.x(best[0]) / 1000) * r.width, py = c.sc.y(best[1]);
+      line.style.left = px + 'px'; dot.style.left = px + 'px'; dot.style.top = py + 'px';
+      if (c.hero) {
+        const hv = document.getElementById(c.hero.v), hs = document.getElementById(c.hero.s);
+        if (!saved) saved = { v: hv.innerHTML, s: hs.innerHTML };
+        hv.textContent = fmtN(best[1], c.hero.f);
+        const base = c.pts[0][1], diff = best[1] - base, pct = base ? (diff / base) * 100 : 0;
+        hs.innerHTML = `<span class="chip ${dir(diff)}">${diff >= 0 ? I.up : I.down}${esc(fmtN(diff, 'usdAbs'))} · ${Math.abs(pct).toFixed(2)}%</span><span class="sub">${esc(scrubLabel(best[0]))}</span>`;
+      }
+    };
+    const end = () => {
+      el.classList.remove('scrub'); S.scrubbing = false;
+      if (saved && c.hero) { document.getElementById(c.hero.v).innerHTML = saved.v; document.getElementById(c.hero.s).innerHTML = saved.s; }
+      saved = null;
+      if (S.pendingRender) { S.pendingRender = false; renderMain(); }
+    };
+    el.addEventListener('pointerdown', (e) => { S.scrubbing = true; el.classList.add('scrub'); at(e.clientX); });
+    el.addEventListener('pointermove', (e) => { if (el.classList.contains('scrub')) at(e.clientX); });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach((ev) => el.addEventListener(ev, end));
+  });
+}
+
+// ---------- Number animation ----------
+const NUMS = new Map();
+function animateNumbers(root) {
+  root.querySelectorAll('.n').forEach((el) => {
+    const k = el.dataset.k, v = Number(el.dataset.v), f = el.dataset.f, prev = NUMS.get(k);
+    NUMS.set(k, v);
+    if (S.hide && (MONEY.has(f) || f === 'amt')) return;
+    let from = prev;
+    if (prev === undefined) { if (!k.startsWith('hero')) return; from = 0; }
+    if (from === v || !isFinite(from)) return;
+    if (prev !== undefined) { el.classList.remove('flash-up', 'flash-down'); void el.offsetWidth; el.classList.add(v > prev ? 'flash-up' : 'flash-down'); }
+    const t0 = performance.now(), dur = prev === undefined ? 1000 : 700;
+    const step = (t) => {
+      if (!el.isConnected) return;
+      const p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+      el.textContent = fmtN(from + (v - from) * e, f);
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  });
 }
 
 // ---------- Views ----------
-function seg() {
-  return `<div class="seg" role="group" aria-label="Period">${PERIODS.map((p) => `<button data-act="period" data-p="${p}" aria-pressed="${p === S.period}">${p.toUpperCase()}</button>`).join('')}</div>`;
+function topbar(left, title, right) { return `<div class="topbar"><div class="topbar-in"><div class="l">${left}</div><div class="t">${title}</div><div class="rr">${right}</div></div></div>`; }
+function livePill() {
+  const ok = !S.priceError && S.lastUpdated;
+  return `<span class="live-pill"><span class="pulse ${ok ? '' : 'off'}"></span>${ok ? 'Live' : S.priceError ? 'Offline' : 'Connecting'}</span>`;
 }
-function summary(title, hs) {
-  const t = total(hs), c = totalChange(hs);
-  return `<section class="card pad summary">
-    <div class="sub" style="font-size:15px">${esc(title)}</div>
-    <div class="big num">${usd(t)}</div>
-    <div class="change-line num ${c ? dir(c.amount) : ''}">${c ? `${I.a(c.amount >= 0 ? 'M7 17 17 7M9 7h8v8' : 'M7 7l10 10M17 9v8H9').replace('width="22" height="22"', 'width="14" height="14"')}<span>${sUsd(c.amount)} (${pct(c.pct)})</span><span class="sub">${S.period.toUpperCase()}</span>` : '&nbsp;'}</div>
-    ${seg()}
-    ${chart(valueHistory(hs), 120)}
-    <div class="caption">7-day value at current holdings</div>
+function periodTabs() { return `<div class="periods" role="group" aria-label="Period">${PERIODS.map((p) => `<button data-act="period" data-p="${p}" aria-pressed="${p === S.period}">${p.toUpperCase()}</button>`).join('')}</div>`; }
+function actionRow(walletId) {
+  const a = (act, label, icon, cls = '') => `<button class="action ${cls}" data-act="${act}" ${walletId ? `data-w="${walletId}"` : ''}><span class="c">${icon}</span>${label}</button>`;
+  return `<div class="actions">${a('ro-buy', 'Buy', I.buy)}${a('ro-sell', 'Sell', I.sell)}${a('ro-swap', 'Swap', I.swap)}${a('ro-send', 'Send', I.send)}${a('receive', 'Receive', I.recv, 'primary')}</div>`;
+}
+function hero(id, label, value, change, opts = {}) {
+  return `<section class="hero">
+    <button class="hero-label" data-act="toggle-hide" aria-label="${S.hide ? 'Show' : 'Hide'} amounts">${label}<span style="display:inline-flex;opacity:0.7">${S.hide ? I.eyeOff : I.eye}</span></button>
+    <div class="hero-value r ${opts.small ? 'small' : ''}" id="hv-${id}">${value == null ? sk(200, 40) : num('hero:' + id, value, opts.fmt || 'usd')}</div>
+    <div class="hero-sub" id="hs-${id}">${value == null ? sk(140, 22) : `${chip(change, 'hc:' + id)}<span class="sub">${PERIOD_LABEL[S.period]}</span>`}</div>
   </section>`;
 }
-function actions(walletId) {
-  const a = (act, label, d) => `<button class="action" data-act="${act}" ${walletId ? `data-w="${walletId}"` : ''}><span class="circle">${I.a(d)}</span>${label}</button>`;
-  return `<div class="actions">${a('ro-buy', 'Buy', 'M12 5v14M5 12h14')}${a('ro-sell', 'Sell', 'M5 12h14')}${a('ro-swap', 'Swap', 'M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7')}${a('ro-send', 'Send', 'M7 17 17 7M9 7h8v8')}${a('receive', 'Receive', 'M17 7 7 17M15 17H7V9')}</div>`;
-}
-function holdingRow(h, withChain) {
+function holdingRow(h) {
+  const c = chg(h.key);
   return `<a class="row" href="#/asset/${encodeURIComponent(h.key)}">
-    ${badge(h.symbol)}
-    <span class="main"><span class="name" style="display:flex;gap:6px;align-items:center">${esc(h.symbol)} ${withChain && h.chain ? chainTag(h.chain) : ''}</span>
-      <span class="meta num">${amt(h.amount)} · ${usd(h.price)}</span></span>
-    ${spark(S.charts[h.key])}
-    <span class="end"><span class="value num">${usd(h.value)}</span>${pill(chg(h.key))}</span>${I.chev}</a>`;
+    ${logo(h, 42)}
+    <span class="m"><span class="nm">${esc(h.name !== h.symbol && h.name.length <= 22 ? h.name : h.symbol)}</span><span class="sb num">${num('amt:' + h.key + (h.walletId || ''), h.amount, 'amt')} ${esc(h.symbol)}</span></span>
+    ${spark(h.key)}
+    <span class="e"><span class="v">${num('val:' + h.key + (h.walletId || ''), h.value, 'usd')}</span><span class="pc num ${c != null ? dir(c) : 'sub'}">${c != null ? num('pc:' + h.key, c, 'pct') : '—'}</span></span></a>`;
 }
-function liveStatus() {
-  const ok = !S.priceError;
-  let txt = 'Loading prices…';
-  if (S.lastUpdated) { const s = Math.max(0, Math.round((Date.now() - S.lastUpdated) / 1000)); txt = `Live · updated ${s < 60 ? s + ' sec' : Math.round(s / 60) + ' min'} ago · prices refresh every 30s`; }
-  return `<div class="live"><span class="dot" style="background:${ok ? 'var(--up)' : 'var(--warn)'}"></span><span id="live-text">${txt}</span></div>`;
+function allocation(assets) {
+  const t = total(assets); if (!(t > 0) || assets.length < 2) return '';
+  const top = assets.slice(0, 5), rest = t - total(top);
+  const parts = top.map((a) => ({ label: a.symbol, color: colorFor(a.symbol), pct: (a.value / t) * 100 }));
+  if (rest / t > 0.005) parts.push({ label: 'Other', color: 'var(--faint)', pct: (rest / t) * 100 });
+  return `<div class="card alloc">
+    <div class="alloc-bar">${parts.map((p) => `<span style="width:${p.pct.toFixed(2)}%;background:${p.color}"></span>`).join('')}</div>
+    <div class="alloc-legend">${parts.map((p) => `<span><i style="background:${p.color}"></i><b>${esc(p.label)}</b><span class="sub num">${p.pct < 1 ? '<1' : p.pct.toFixed(0)}%</span></span>`).join('')}</div></div>`;
 }
-function navHome() {
-  return `<div class="nav"><div class="left"><button class="icon-btn" data-act="settings" aria-label="Settings">${I.gear}</button></div><div></div>
-    <div class="right"><button class="icon-btn" data-act="refresh" aria-label="Refresh"><span class="${S.spinning ? 'spin' : ''}" style="display:inline-flex">${I.refresh}</span></button><button class="icon-btn" data-act="add" aria-label="Add wallet">${I.plus}</button></div></div>`;
+function walletCard(w) {
+  const hs = walletHoldings(w), c = totalChange(hs), loading = !S.raw[w.id] && !S.errors[w.id], err = S.errors[w.id];
+  return `<a class="wcard" href="#/wallet/${w.id}">
+    <div class="wtop"><img src="${chainIcon(w.chain)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'"><div style="min-width:0"><div class="wname">${esc(w.name)}</div><div class="wchain">${esc(CHAINS[w.chain].name)}</div></div>
+      ${err ? `<span style="margin-left:auto;color:var(--warn)" title="Couldn't refresh">${I.warn}</span>` : ''}</div>
+    <div class="wval r">${loading ? sk(120, 26) : num('w:' + w.id, total(hs), 'usd')}</div>
+    <div class="wfoot">${loading ? sk(60, 18) : c ? `<span class="chip sm ${dir(c.pct)}">${c.pct >= 0 ? I.up : I.down}${num('wc:' + w.id, c.pct, 'pctAbs')}</span>` : '<span class="chip sm flat">—</span>'}<span class="mono">${esc(short(w.address))}</span></div></a>`;
 }
 function installTip() {
   const standalone = window.navigator.standalone || matchMedia('(display-mode: standalone)').matches;
   if (standalone || load('cw.tipDismissed', false)) return '';
-  return `<div class="install-tip"><span style="flex:1">Install it: tap ${I.shareIos} <b>Share</b> in Safari, then <b>Add to Home Screen</b>.</span><button class="text-btn" style="min-height:24px;padding:0" data-act="dismiss-tip" aria-label="Dismiss">✕</button></div>`;
+  return `<div class="tip"><span style="flex:1">Install it: tap ${I.shareIos} <b>Share</b> in Safari, then <b>Add to Home Screen</b>.</span><button class="ib" style="width:32px;height:32px;color:inherit" data-act="dismiss-tip" aria-label="Dismiss">${I.close}</button></div>`;
+}
+function homeBar() {
+  return topbar(livePill(), '', `<button class="ib" data-act="refresh" aria-label="Refresh"><span class="${S.spinning ? 'spin' : ''}" style="display:inline-flex">${I.refresh}</span></button><button class="ib" data-act="settings" aria-label="Settings">${I.gear}</button><button class="ib accent" data-act="add" aria-label="Add wallet">${I.plus}</button>`);
+}
+function lastUpdatedText() {
+  if (!S.lastUpdated) return 'Connecting…';
+  const s = Math.max(0, Math.round((Date.now() - S.lastUpdated) / 1000));
+  return `Updated ${s < 5 ? 'just now' : s < 60 ? s + 's ago' : Math.round(s / 60) + 'm ago'} · refreshes every 30s`;
 }
 
 function viewHome() {
   if (!S.wallets.length) {
-    return `${navHome()}<h1 class="large-title">Portfolio</h1>${installTip()}
-      <div class="empty"><span style="color:var(--accent)">${I.lock.replace(/48/g, '64')}</span><h2 style="margin:0">Track any wallet</h2>
-      <p class="sub" style="margin:0;line-height:1.4">Add a public wallet address to see its coins, balances and live price moves. Read-only — never enter a seed phrase or private key.</p>
-      <button class="primary" data-act="add">Add wallet</button></div>`;
+    return `${homeBar()}<h1 class="h1">Portfolio</h1>${installTip()}
+      <div class="empty"><div class="art">${I.wallet}</div><h2 style="margin:6px 0 0;font-size:22px">Track any wallet</h2>
+      <p class="sub" style="margin:0;line-height:1.5;max-width:320px">Add a public wallet address to see its coins, balances and live price moves. Read-only — never enter a seed phrase or private key.</p>
+      <button class="btn" data-act="add" style="margin-top:8px">${I.plus} Add wallet</button></div>`;
   }
-  const assets = allAssets();
-  const walletRows = S.wallets.map((w) => {
-    const hs = walletHoldings(w), c = totalChange(hs), loading = !S.raw[w.id] && !S.errors[w.id];
-    return `<a class="row" href="#/wallet/${w.id}">
-      <span class="wallet-icon" style="background:${CHAINS[w.chain].color}">${I.wallet}</span>
-      <span class="main"><span class="name">${esc(w.name)}${S.errors[w.id] ? ` <span style="color:var(--warn)" title="Couldn't refresh">${I.warn.replace(/18/g, '14')}</span>` : ''}</span>
-        <span class="meta">${chainTag(w.chain)}<span class="mono">${esc(short(w.address))}</span></span></span>
-      <span class="end">${loading ? '<span class="sub" style="font-size:13px">Loading…</span>' : `<span class="value num">${usd(total(hs))}</span>${pill(c && c.pct)}`}</span>${I.chev}</a>`;
-  }).join('');
-  return `${navHome()}<h1 class="large-title">Portfolio</h1>${installTip()}
-    ${summary('Total balance', assets)}
-    ${actions(null)}
-    ${S.priceError ? `<div class="card" style="margin-top:16px"><div class="warn">${I.warn}<span>${esc(S.priceError)}</span></div></div>` : ''}
-    <div class="section-h">Wallets</div><div class="card">${walletRows}</div>
-    <div class="section-h">Assets</div><div class="card">${assets.length ? assets.map((a) => holdingRow(a, true)).join('') : `<div class="kv sub">${S.refreshing ? 'Loading…' : 'No priced holdings yet'}</div>`}</div>
-    ${liveStatus()}`;
+  const assets = allAssets(), anyLoaded = S.wallets.some((w) => S.raw[w.id]) && Object.keys(S.prices).length;
+  const t = total(assets), c = totalChange(assets);
+  return `${homeBar()}<h1 class="h1">Portfolio</h1>${installTip()}
+    ${hero('home', 'Total balance', anyLoaded ? t : null, c)}
+    ${chartBlock('home', valueHistory(assets, S.period), 170, { v: 'hv-home', s: 'hs-home', f: 'usd' })}
+    ${periodTabs()}
+    ${actionRow(null)}
+    ${S.priceError ? `<div class="alert">${I.warn}<span>${esc(S.priceError)}</span></div>` : ''}
+    <div class="sec"><h2>Wallets</h2><button class="more" data-act="add">Add</button></div>
+    <div class="wstrip">${S.wallets.map(walletCard).join('')}<button class="wcard add" data-act="add">${I.plus}<span>Add wallet</span></button></div>
+    ${assets.length > 1 ? `<div class="sec" style="padding-top:14px"><h2>Allocation</h2></div>${allocation(assets)}` : ''}
+    <div class="sec"><h2>Assets</h2><span class="sub" style="font-size:14px">${assets.length || ''}</span></div>
+    <div class="card">${assets.length ? assets.map(holdingRow).join('') : anyLoaded ? '<div class="kv sub">No priced holdings yet</div>' : [1, 2, 3].map(() => `<div class="row">${sk(42, 42)}<span class="m">${sk(90)}${sk(60, 12)}</span>${sk(70)}</div>`).join('')}</div>
+    ${S.hideSmall ? '<div class="note">Balances under $1 and unpriced (often spam) tokens are hidden. Change this in Settings.</div>' : ''}
+    <div class="foot"><span id="live-text">${lastUpdatedText()}</span></div>`;
 }
 
 function viewWallet(id) {
   const w = S.wallets.find((x) => x.id === id);
-  if (!w) return `<div class="nav"><div class="left"><a class="text-btn" href="#/">${I.back} Portfolio</a></div></div><p class="sub" style="text-align:center">Wallet removed</p>`;
-  const hs = walletHoldings(w), c = CHAINS[w.chain];
-  return `<div class="nav"><div class="left"><a class="text-btn" href="#/">${I.back} Portfolio</a></div><div class="title">${esc(w.name)}</div>
-    <div class="right"><button class="text-btn" data-act="edit" data-w="${w.id}">Edit</button></div></div>
-    <div style="height:12px"></div>
-    ${summary(c.name + ' balance', hs)}
-    ${actions(w.id)}
-    <div class="section-h">Address</div>
+  if (!w) return `${topbar(`<a class="back" href="#/">${I.back}Portfolio</a>`, '', '')}<p class="sub" style="text-align:center;margin-top:40px">Wallet removed</p>`;
+  const hs = walletHoldings(w), c = CHAINS[w.chain], loaded = !!S.raw[w.id];
+  return `${topbar(`<a class="back" href="#/">${I.back}Portfolio</a>`, esc(w.name), `<button class="tb" data-act="edit" data-w="${w.id}">Edit</button>`)}
+    <div style="display:flex;align-items:center;gap:10px;padding:14px 20px 0"><img src="${chainIcon(w.chain)}" alt="" style="width:28px;height:28px;border-radius:50%">
+      <b>${esc(c.name)}</b><button class="addr-chip mono" data-act="copy" data-text="${esc(w.address)}" aria-label="Copy address">${esc(short(w.address))} ${I.copy}</button></div>
+    ${hero('w-' + w.id, 'Wallet balance', loaded ? total(hs) : null, totalChange(hs))}
+    ${chartBlock('w-' + w.id, valueHistory(hs, S.period), 160, { v: 'hv-w-' + w.id, s: 'hs-w-' + w.id, f: 'usd' })}
+    ${periodTabs()}
+    ${actionRow(w.id)}
+    ${S.errors[w.id] ? `<div class="alert">${I.warn}<span>Couldn't refresh balances: ${esc(S.errors[w.id])}</span></div>` : ''}
+    <div class="sec"><h2>Holdings</h2><span class="sub" style="font-size:14px">${hs.length || ''}</span></div>
+    <div class="card">${hs.length ? hs.map((h) => holdingRow({ ...h, walletId: w.id })).join('') : `<div class="kv sub">${loaded ? 'No priced holdings found' : 'Loading…'}</div>`}</div>
+    ${S.hideSmall ? '<div class="note">Balances under $1 and unpriced (often spam) tokens are hidden.</div>' : ''}
+    <div class="sec"><h2>Details</h2></div>
     <div class="card">
-      <button class="row" style="min-height:44px" data-act="copy" data-text="${esc(w.address)}"><span class="mono" style="flex:1;font-size:13px;word-break:break-all">${esc(w.address)}</span><span style="color:var(--accent)">${I.copy}</span></button>
-      <a class="row" style="min-height:44px;color:var(--accent)" href="${esc(c.explorer + w.address)}" target="_blank" rel="noopener">${I.compass}<span>View on explorer</span></a>
-    </div>
-    ${S.errors[w.id] ? `<div class="card" style="margin-top:16px"><div class="warn">${I.warn}<span>Couldn't refresh balances: ${esc(S.errors[w.id])}</span></div></div>` : ''}
-    <div class="section-h">Holdings</div>
-    <div class="card">${hs.length ? hs.map((h) => holdingRow(h, false)).join('') : `<div class="kv sub">${S.raw[w.id] ? 'No priced holdings found' : 'Loading…'}</div>`}</div>
-    ${S.hideSmall ? '<div class="section-f">Balances under $1 and unpriced (often spam) tokens are hidden. Change this in Settings.</div>' : ''}`;
+      <button class="row" style="min-height:52px" data-act="copy" data-text="${esc(w.address)}"><span class="m"><span class="sb">Address</span><span class="mono" style="font-size:13px;word-break:break-all">${esc(w.address)}</span></span><span style="color:var(--accent)">${I.copy}</span></button>
+      <a class="row" style="min-height:52px" href="${esc(c.explorer + w.address)}" target="_blank" rel="noopener"><span class="m"><span class="nm" style="font-weight:550">View on explorer</span></span><span style="color:var(--accent)">${I.ext}</span></a>
+    </div>`;
 }
 
 function viewAsset(key) {
   const a = allAssets().find((x) => x.key === key);
   const held = S.wallets.map((w) => { const r = (S.raw[w.id] || []).find((x) => x.key === key); const h = r && priced(r, w.chain); return h && h.amount > 0 ? [w, h] : null; }).filter(Boolean);
-  const sym = a?.symbol || held[0]?.[1].symbol || 'Coin';
-  const price = S.prices[key]?.price, pts = S.charts[key];
-  let hiLo = '';
-  if (pts && pts.length > 1) { const ys = pts.map((p) => p[1]); hiLo = `<div class="caption num" style="display:flex;justify-content:space-between"><span>7-day low ${usd(Math.min(...ys))}</span><span>high ${usd(Math.max(...ys))}</span></div>`; }
-  return `<div class="nav"><div class="left"><a class="text-btn" href="#/">${I.back} Portfolio</a></div><div class="title">${esc(sym)}</div><div></div></div>
-    <div style="height:12px"></div>
-    <section class="card pad summary">
-      <div style="display:flex;align-items:center;gap:12px">${badge(sym, 44)}<div style="display:flex;flex-direction:column;gap:3px"><b>${esc(a?.name || sym)}</b>${a?.chain ? `<span>${chainTag(a.chain)}</span>` : ''}</div></div>
-      ${price != null ? `<div class="big num" style="font-size:34px">${usd(price)}</div>` : ''}
-      ${chart(pts, 170)}${hiLo}
-      <div class="caption">Price, last 7 days</div>
-    </section>
-    <div class="section-h">Price change</div>
-    <div class="card">${PERIODS.map((p) => { const c = chg(key, p); const d = c != null && a ? a.value - a.value / (1 + c / 100) : null;
-      return `<div class="kv"><span style="width:44px;font-weight:500">${p.toUpperCase()}</span><span style="flex:1;text-align:right" class="num ${d != null ? dir(d) : ''}">${d != null ? sUsd(d) : ''}</span><span style="min-width:76px;text-align:right">${pill(c)}</span></div>`; }).join('')}</div>
-    ${a ? `<div class="section-h">Your position</div><div class="card"><div class="kv"><span>Amount</span><span class="sub num">${amt(a.amount)} ${esc(a.symbol)}</span></div><div class="kv"><span>Value</span><span class="sub num">${usd(a.value)}</span></div></div>` : ''}
-    ${held.length ? `<div class="section-h">Held in</div><div class="card">${held.map(([w, h]) => `<a class="row" href="#/wallet/${w.id}" style="min-height:56px"><span class="main"><span style="font-size:17px">${esc(w.name)}</span><span class="meta">${chainTag(w.chain)}<span class="mono">${esc(short(w.address))}</span></span></span><span class="end"><span class="num">${usd(h.value)}</span><span class="sub num" style="font-size:12px">${amt(h.amount)}</span></span>${I.chev}</a>`).join('')}</div>` : ''}`;
+  const base = a || held[0]?.[1] || { key, symbol: (S.meta[key]?.symbol || S.prices[key]?.symbol || 'Coin').toUpperCase(), name: S.meta[key]?.name || '' };
+  const price = S.prices[key]?.price, c = chg(key);
+  const priceChange = c != null && price != null ? { amount: price - price / (1 + c / 100), pct: c } : null;
+  return `${topbar(`<a class="back" href="#/">${I.back}Portfolio</a>`, esc(base.symbol), '')}
+    <div style="display:flex;align-items:center;gap:12px;padding:14px 20px 0">${logo(base, 44)}<div><div style="font-weight:700;font-size:17px">${esc(base.name || base.symbol)}</div><div class="sub" style="font-size:13px">${esc(base.symbol)}${base.chain ? ' · ' + esc(CHAINS[base.chain].name) : ''}</div></div></div>
+    ${hero('a-' + key, 'Price', price ?? null, priceChange, { fmt: 'price', small: true })}
+    ${chartBlock('a-' + key, priceHistory(key, S.period), 170, { v: 'hv-a-' + key, s: 'hs-a-' + key, f: 'price' })}
+    ${periodTabs()}
+    ${a ? `<div class="sec"><h2>Your position</h2></div>
+      <div class="grid2">
+        <div class="stat"><span class="k">Value</span><span class="val r">${num('pv:' + key, a.value, 'usd')}</span></div>
+        <div class="stat"><span class="k">Amount</span><span class="val r" style="font-size:17px;overflow-wrap:anywhere">${num('pa:' + key, a.amount, 'amt')} <span class="sub" style="font-size:13px">${esc(a.symbol)}</span></span></div>
+      </div>` : ''}
+    <div class="sec"><h2>Performance</h2></div>
+    <div class="grid2">${PERIODS.map((p) => { const cp = chg(key, p); const d = cp != null && a ? a.value - a.value / (1 + cp / 100) : null;
+      return `<div class="stat"><span class="k">${PERIOD_LABEL[p]}</span><span class="val num ${cp != null ? dir(cp) : 'sub'}">${cp != null ? num('perf:' + key + p, cp, 'pct') : '—'}</span>${d != null ? `<span class="s2 num ${dir(d)}">${d >= 0 ? '+' : '−'}${num('perfd:' + key + p, d, 'usdAbs')}</span>` : ''}</div>`; }).join('')}</div>
+    ${held.length ? `<div class="sec"><h2>Held in</h2></div><div class="card">${held.map(([w, h]) => `<a class="row" href="#/wallet/${w.id}"><img src="${chainIcon(w.chain)}" alt="" style="width:36px;height:36px;border-radius:50%"><span class="m"><span class="nm">${esc(w.name)}</span><span class="sb mono">${esc(short(w.address))}</span></span><span class="e"><span class="v">${num('hv:' + w.id + key, h.value, 'usd')}</span><span class="sb num">${num('ha:' + w.id + key, h.amount, 'amt')}</span></span><span style="color:var(--faint)">${I.chev}</span></a>`).join('')}</div>` : ''}`;
 }
 
 function route() { const h = location.hash.replace(/^#/, '') || '/'; const [, kind, arg] = h.split('/'); return { kind: kind || 'home', arg: arg ? decodeURIComponent(arg) : null }; }
+let lastRoute = null;
 function renderMain() {
-  const r = route(); const main = document.getElementById('main');
-  main.innerHTML = r.kind === 'wallet' ? viewWallet(r.arg) : r.kind === 'asset' ? viewAsset(r.arg) : viewHome();
+  if (S.scrubbing) { S.pendingRender = true; return; }
+  const r = route(), rk = r.kind + ':' + (r.arg || ''), main = document.getElementById('main');
+  const strip = main.querySelector('.wstrip'), stripX = strip ? strip.scrollLeft : 0;
+  CHARTS.clear();
+  const enter = rk !== lastRoute ? (r.kind === 'home' ? 'page' : 'page push') : '';
+  main.innerHTML = `<div class="${enter}">${r.kind === 'wallet' ? viewWallet(r.arg) : r.kind === 'asset' ? viewAsset(r.arg) : viewHome()}</div>`;
+  if (rk === lastRoute) { const s2 = main.querySelector('.wstrip'); if (s2) s2.scrollLeft = stripX; }
+  lastRoute = rk;
+  attachCharts(main); animateNumbers(main);
 }
 window.addEventListener('hashchange', () => { renderMain(); window.scrollTo(0, 0); });
-setInterval(() => { const el = document.getElementById('live-text'); if (el && S.lastUpdated) { const s = Math.max(0, Math.round((Date.now() - S.lastUpdated) / 1000)); el.textContent = `Live · updated ${s < 60 ? s + ' sec' : Math.round(s / 60) + ' min'} ago · prices refresh every 30s`; } }, 1000);
+setInterval(() => { const el = document.getElementById('live-text'); if (el) el.textContent = lastUpdatedText(); }, 1000);
+
+// ---------- Pull to refresh ----------
+(() => {
+  const ptr = document.getElementById('ptr'); ptr.innerHTML = I.refresh;
+  let y0 = null, pull = 0;
+  document.addEventListener('touchstart', (e) => { y0 = window.scrollY <= 0 && !document.getElementById('sheet-root').firstChild && !S.scrubbing ? e.touches[0].clientY : null; pull = 0; }, { passive: true });
+  document.addEventListener('touchmove', (e) => {
+    if (y0 == null || S.scrubbing) return;
+    pull = Math.max(0, e.touches[0].clientY - y0);
+    const d = Math.min(90, pull * 0.5);
+    ptr.style.transition = 'none'; ptr.style.opacity = Math.min(1, d / 40);
+    ptr.style.transform = `translateY(${d - 40}px) rotate(${pull * 2}deg)`;
+  }, { passive: true });
+  document.addEventListener('touchend', () => {
+    if (y0 == null) return;
+    ptr.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+    if (pull * 0.5 > 60) {
+      ptr.firstElementChild.classList.add('spin'); ptr.style.transform = 'translateY(20px)';
+      refresh(true, true).finally(() => { ptr.firstElementChild.classList.remove('spin'); ptr.style.transform = 'translateY(-60px)'; ptr.style.opacity = 0; });
+    } else { ptr.style.transform = 'translateY(-60px)'; ptr.style.opacity = 0; }
+    y0 = null; pull = 0;
+  });
+})();
 
 // ---------- Sheets ----------
 function openSheet(html, onMount) {
   const root = document.getElementById('sheet-root');
-  root.innerHTML = `<div class="sheet-backdrop" data-act="sheet-bg"><div class="sheet" role="dialog" aria-modal="true">${'<div class="grab"></div>'}${html}</div></div>`;
+  root.innerHTML = `<div class="sheet-bg" data-act="sheet-bg"><div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>${html}</div></div>`;
   document.body.style.overflow = 'hidden';
   if (onMount) onMount(root.querySelector('.sheet'));
 }
 function closeSheet() { document.getElementById('sheet-root').innerHTML = ''; document.body.style.overflow = ''; }
-function sheetNav(left, title, right) { return `<div class="nav"><div class="left">${left}</div><div class="title">${esc(title)}</div><div class="right">${right}</div></div>`; }
-function toast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 1600); }
+function sheetBar(left, title, right) { return `<div class="bar"><div>${left}</div><div class="t">${esc(title)}</div><div class="rr">${right}</div></div>`; }
+function toast(msg) { document.querySelectorAll('.toast').forEach((t) => t.remove()); const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 1800); }
+const chainTag = (c) => `<span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--sub)"><img src="${chainIcon(c)}" alt="" style="width:16px;height:16px;border-radius:50%">${esc(CHAINS[c].name)}</span>`;
 
 // Address checks (same rules as the iOS app)
 const RX = {
@@ -606,23 +881,24 @@ function looksSecret(text) {
 
 function openEditor(existing) {
   const w = existing || { name: '', chain: 'ethereum', address: '', tokens: [] };
-  openSheet(`${sheetNav('<button class="text-btn" data-act="close">Cancel</button>', existing ? 'Edit Wallet' : 'Add Wallet', '<button class="text-btn bold" id="ed-save" disabled>Save</button>')}
+  openSheet(`${sheetBar('<button class="tb" data-act="close">Cancel</button>', existing ? 'Edit Wallet' : 'Add Wallet', '<button class="tb bold" id="ed-save" disabled>Save</button>')}
     <div class="body">
-      <div id="ed-secret" hidden style="margin-top:12px"><div class="card"><div class="warn" style="color:var(--down)">${I.hand}<span>This looks like a <b>seed phrase or private key</b>. Never type those into any app or website. This app only needs your <b>public address</b>.</span></div><button class="danger" id="ed-clear" style="border-top:0.5px solid var(--sep)">Clear it</button></div></div>
-      <div class="card" style="margin-top:16px">
+      <div id="ed-secret" hidden style="margin-top:12px"><div class="card"><div class="alert" style="margin:0;border-radius:0;background:var(--down-soft);color:var(--down)">${I.hand}<span>This looks like a <b>seed phrase or private key</b>. Never type those into any app or website. This app only needs your <b>public address</b>.</span></div><button class="danger" id="ed-clear">Clear it</button></div></div>
+      <div class="sh">Public address</div>
+      <div class="card"><div class="field frow"><label style="flex:1"><span class="sr">Public address</span><textarea id="ed-addr" rows="2" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="${esc(CHAINS[w.chain].ph)}">${esc(w.address)}</textarea></label>
+        <button class="ib accent" id="ed-paste" aria-label="Paste from clipboard">${I.clip}</button></div></div>
+      <div class="note" id="ed-addr-note" style="font-size:13px"></div>
+      <div class="sh">Details</div>
+      <div class="card">
         <label class="field"><span class="sr">Name</span><input id="ed-name" placeholder="Name (e.g. Ledger, Main)" value="${esc(w.name)}" autocomplete="off"></label>
-        <label class="field field-row"><span style="flex:1">Network</span><select id="ed-chain">${Object.entries(CHAINS).map(([k, c]) => `<option value="${k}" ${k === w.chain ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select></label>
+        <label class="field frow"><span style="flex:1">Network</span><select id="ed-chain">${Object.entries(CHAINS).map(([k, c]) => `<option value="${k}" ${k === w.chain ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select></label>
       </div>
-      <div class="section-h">Public address</div>
-      <div class="card"><div class="field field-row"><label style="flex:1"><span class="sr">Public address</span><textarea id="ed-addr" rows="2" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="${esc(CHAINS[w.chain].ph)}">${esc(w.address)}</textarea></label>
-        <button class="icon-btn" id="ed-paste" aria-label="Paste from clipboard">${I.clip}</button></div></div>
-      <div class="section-f" id="ed-addr-note" style="font-size:13px"></div>
       <div id="ed-tokens-box">
-        <div class="section-h">Extra token contracts (optional)</div>
+        <div class="sh">Extra token contracts (optional)</div>
         <div class="card"><label class="field"><span class="sr">Extra token contracts</span><textarea id="ed-tokens" rows="2" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="0x… one per line" style="font-size:13px">${esc((w.tokens || []).join('\n'))}</textarea></label></div>
-        <div class="section-f" id="ed-tokens-note" style="font-size:13px"></div>
+        <div class="note" id="ed-tokens-note" style="font-size:13px"></div>
       </div>
-      ${existing ? `<div class="card" style="margin-top:28px"><button class="danger" id="ed-remove">Remove wallet</button></div><div class="section-f">This only removes it from this app. Nothing happens to the wallet itself.</div>` : ''}
+      ${existing ? `<div class="card" style="margin-top:28px"><button class="danger" id="ed-remove">Remove wallet</button></div><div class="note">This only removes it from this app. Nothing happens to the wallet itself.</div>` : ''}
     </div>`, (el) => {
     const $ = (id) => el.querySelector('#' + id);
     let detected = false;
@@ -634,13 +910,11 @@ function openEditor(existing) {
       $('ed-addr').placeholder = CHAINS[c].ph;
       const secret = looksSecret($('ed-addr').value) || looksSecret($('ed-tokens').value);
       $('ed-secret').hidden = !secret;
-      const prob = addr ? addrProblem(addr, c) : null;
-      const note = $('ed-addr-note');
+      const prob = addr ? addrProblem(addr, c) : null, note = $('ed-addr-note');
       note.style.color = prob ? 'var(--down)' : '';
       note.textContent = prob || (detected && addr ? `Detected ${CHAINS[c].name} address.` : isEvm ? 'The same 0x address works on every EVM network — add it once per network you use.' : '');
       $('ed-tokens-box').hidden = !isEvm;
-      const bad = isEvm ? tokenList().filter((x) => !RX.evm.test(x)) : [];
-      const tn = $('ed-tokens-note');
+      const bad = isEvm ? tokenList().filter((x) => !RX.evm.test(x)) : [], tn = $('ed-tokens-note');
       tn.style.color = bad.length ? 'var(--down)' : '';
       tn.textContent = bad.length ? 'Not a valid contract address: ' + bad.join(', ') : c === 'ethereum' ? 'Ethereum tokens are found automatically. Add a contract here if one is missing.' : 'Major tokens (USDC, USDT, WETH…) are checked automatically. Add any other token contract here.';
       $('ed-save').disabled = !addr || !!prob || secret || bad.length > 0;
@@ -656,7 +930,7 @@ function openEditor(existing) {
       const i = S.wallets.findIndex((x) => x.id === nw.id);
       if (i >= 0) S.wallets[i] = nw; else S.wallets.push(nw);
       if (existing && (existing.address !== nw.address || existing.chain !== nw.chain)) delete S.raw[nw.id];
-      saveWallets(); closeSheet(); renderMain();
+      saveWallets(); closeSheet(); renderMain(); toast(existing ? 'Wallet updated' : 'Wallet added');
       refreshBalances(nw).then(() => refreshPrices(true)).then(() => { saveCache(); renderMain(); });
     });
     if (existing) $('ed-remove').addEventListener('click', () => {
@@ -665,56 +939,57 @@ function openEditor(existing) {
       saveWallets(); saveCache(); closeSheet(); location.hash = '#/'; renderMain();
     });
     check(false);
-    if (!existing) setTimeout(() => $('ed-addr').focus(), 250);
+    if (!existing) setTimeout(() => $('ed-addr').focus(), 300);
   });
 }
 
 function openReceive(walletId) {
   const list = walletId ? S.wallets.filter((w) => w.id === walletId) : S.wallets;
   const qrSvg = (text) => { try { const q = qrcode(0, 'M'); q.addData(text); q.make(); return q.createSvgTag({ cellSize: 4, margin: 0, scalable: true }); } catch (e) { return ''; } };
-  openSheet(`${sheetNav('<span></span>', 'Receive', '<button class="text-btn bold" data-act="close">Done</button>')}
+  openSheet(`${sheetBar('<span></span>', 'Receive', '<button class="tb bold" data-act="close">Done</button>')}
     <div class="body">${list.length ? list.map((w) => `
-      <div class="card pad" style="margin-top:16px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center">
-        <div style="display:flex;gap:8px;align-items:center"><b>${esc(w.name)}</b>${chainTag(w.chain)}</div>
+      <div class="card pad" style="margin-top:14px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center">
+        <div style="display:flex;gap:10px;align-items:center"><b style="font-size:17px">${esc(w.name)}</b>${chainTag(w.chain)}</div>
         <div class="qr" role="img" aria-label="QR code of the address">${qrSvg(w.address)}</div>
-        <div class="mono" style="font-size:14px;word-break:break-all;line-height:1.4">${esc(w.address)}</div>
+        <div class="mono" style="font-size:14px;word-break:break-all;line-height:1.45;max-width:320px">${esc(w.address)}</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%">
-          <button class="primary" data-act="copy" data-text="${esc(w.address)}">Copy</button>
-          <button class="secondary" data-act="share" data-text="${esc(w.address)}">${I.share} Share</button>
+          <button class="btn" data-act="copy" data-text="${esc(w.address)}">${I.copy} Copy</button>
+          <button class="btn alt" data-act="share" data-text="${esc(w.address)}">${I.share} Share</button>
         </div>
         <div class="sub" style="font-size:13px">Only send ${esc(CHAINS[w.chain].name)}-network assets to this address.</div>
       </div>`).join('') : '<p class="sub" style="text-align:center;margin-top:40px">Add a wallet first.</p>'}</div>`);
 }
 
 function openReadOnly(what) {
-  openSheet(`${sheetNav('<span></span>', 'Read-only app', '<button class="text-btn bold" data-act="close">OK</button>')}
-    <div class="body"><div class="card pad" style="margin-top:16px;line-height:1.45">CryptoWatch only views balances, so it can't ${esc(what)}. Open the wallet app that holds this address (Ledger Live, MetaMask, Phantom, Coinbase Wallet…). Any change shows up here automatically.</div></div>`);
+  openSheet(`${sheetBar('<span></span>', 'Read-only app', '<button class="tb bold" data-act="close">OK</button>')}
+    <div class="body"><div class="card pad" style="margin-top:14px;line-height:1.5">CryptoWatch only views balances, so it can't ${esc(what)}. Open the wallet app that holds this address (Ledger Live, MetaMask, Phantom, Coinbase Wallet…). Any change shows up here automatically.</div></div>`);
 }
 
 function openSettings() {
   const lockSupported = !!(window.PublicKeyCredential && navigator.credentials);
-  openSheet(`${sheetNav('<span></span>', 'Settings', '<button class="text-btn bold" data-act="close">Done</button>')}
+  const tgl = (id, label, on, dis) => `<label class="kv"><span>${label}</span><span class="tg"><input type="checkbox" id="${id}" ${on ? 'checked' : ''} ${dis ? 'disabled' : ''}><span></span></span></label>`;
+  openSheet(`${sheetBar('<span></span>', 'Settings', '<button class="tb bold" data-act="close">Done</button>')}
     <div class="body">
-      <div class="section-h">Privacy</div>
-      <div class="card"><label class="kv"><span>Require Face ID</span><span class="toggle"><input type="checkbox" id="st-lock" ${S.lockId ? 'checked' : ''} ${lockSupported ? '' : 'disabled'}><span></span></span></label></div>
-      <div class="section-f" id="st-lock-note">${lockSupported ? 'Asks for Face ID (or your passcode) when you open the app and hides it when you leave. Your phone saves a passkey named “CryptoWatch” for this.' : 'Face ID lock isn’t available in this browser.'}</div>
-      <div class="section-h">Display</div>
-      <div class="card"><label class="kv"><span>Hide balances under $1</span><span class="toggle"><input type="checkbox" id="st-hide" ${S.hideSmall ? 'checked' : ''}><span></span></span></label></div>
-      <div class="section-f">Also hides tokens with no reliable market price, which are usually airdropped spam.</div>
-      <div class="section-h">Safety</div>
-      <div class="card"><div class="kv" style="padding:12px 16px;line-height:1.4">Read-only. Wallet addresses are stored only in this browser on this device. Never enter a seed phrase or private key — no tracker needs it.</div></div>
-      <div class="section-h">Data sources</div>
-      <div class="card">${[['Prices & charts', 'DefiLlama'], ['Bitcoin', 'mempool.space'], ['Litecoin', 'litecoinspace.org'], ['EVM chains', 'PublicNode RPC'], ['Ethereum tokens', 'Blockscout'], ['Solana', 'Jupiter']].map(([a, b]) => `<div class="kv"><span>${a}</span><span class="sub">${b}</span></div>`).join('')}</div>
-      <div class="section-f">Free public APIs, no account or key. Prices refresh every 30 seconds while open; balances every 2 minutes.</div>
-      <div class="section-h">Troubleshooting</div>
-      <div class="card"><button class="row" style="min-height:44px;color:var(--accent)" id="st-diag">Check connections</button><div id="st-diag-out"></div></div>
-      <div class="section-f">Tests each data service from this phone. If one fails, screenshot this and send it over.</div>
-      <div class="card" style="margin-top:28px"><button class="danger" id="st-wipe">Remove all wallets &amp; data</button></div>
-      <div class="section-f" style="text-align:center;padding-top:16px">CryptoWatch web · version ${APP_VERSION}</div>
+      <div class="sh">Privacy</div>
+      <div class="card">${tgl('st-lock', 'Require Face ID', S.lockId, !lockSupported)}${tgl('st-mask', 'Hide amounts', S.hide)}</div>
+      <div class="note" id="st-lock-note">${lockSupported ? 'Face ID asks to unlock when you open the app and hides it when you leave. You can also tap “Total balance” to hide or show amounts.' : 'Face ID lock isn’t available in this browser.'}</div>
+      <div class="sh">Display</div>
+      <div class="card">${tgl('st-hide', 'Hide balances under $1', S.hideSmall)}</div>
+      <div class="note">Also hides tokens with no reliable market price, which are usually airdropped spam.</div>
+      <div class="sh">Safety</div>
+      <div class="card pad" style="line-height:1.5;font-size:15px">Read-only. Wallet addresses are stored only in this browser on this device. Never enter a seed phrase or private key — no tracker needs it.</div>
+      <div class="sh">Data sources</div>
+      <div class="card">${[['Prices & charts', 'DefiLlama'], ['Bitcoin', 'mempool.space'], ['Litecoin', 'litecoinspace.org'], ['EVM chains', 'PublicNode'], ['Ethereum tokens', 'Blockscout'], ['Solana', 'Jupiter']].map(([a, b]) => `<div class="kv"><span>${a}</span><span class="sub">${b}</span></div>`).join('')}</div>
+      <div class="sh">Troubleshooting</div>
+      <div class="card"><button class="row" style="min-height:50px;color:var(--accent);font-weight:600" id="st-diag">Check connections</button><div id="st-diag-out"></div></div>
+      <div class="note">Tests each data service from this phone. If one fails, screenshot this and send it over.</div>
+      <div class="card" style="margin-top:24px"><button class="danger" id="st-wipe">Remove all wallets &amp; data</button></div>
+      <div class="note" style="text-align:center;padding-top:16px">CryptoWatch web · version ${APP_VERSION}</div>
     </div>`, (el) => {
     el.querySelector('#st-hide').addEventListener('change', (e) => { S.hideSmall = e.target.checked; save('cw.hideSmall', S.hideSmall); renderMain(); });
+    el.querySelector('#st-mask').addEventListener('change', (e) => { S.hide = e.target.checked; save('cw.hideAmounts', S.hide); renderMain(); });
     el.querySelector('#st-lock').addEventListener('change', async (e) => {
-      const box = e.target; const note = el.querySelector('#st-lock-note');
+      const box = e.target, note = el.querySelector('#st-lock-note');
       try {
         if (box.checked) { await enableLock(); note.textContent = 'On. CryptoWatch will ask for Face ID when you open it.'; }
         else { await verifyLock(); S.lockId = null; save('cw.lockId', null); note.textContent = 'Off.'; }
@@ -723,7 +998,6 @@ function openSettings() {
     el.querySelector('#st-diag').addEventListener('click', async (e) => {
       const btn = e.currentTarget, out = el.querySelector('#st-diag-out');
       btn.disabled = true; btn.textContent = 'Checking…';
-      const addr = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
       const tests = [
         ['Prices (DefiLlama)', () => getJSON(`${LLAMA}/prices/current/coingecko:bitcoin`)],
         ['Price changes (DefiLlama)', () => getJSON(`${LLAMA}/percentage/coingecko:bitcoin?period=24h`)],
@@ -731,7 +1005,7 @@ function openSettings() {
         ['Bitcoin (mempool.space)', () => getJSON('https://mempool.space/api/address/1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa')],
         ['Litecoin (litecoinspace)', () => getJSON('https://litecoinspace.org/api/blocks/tip/height')],
         ['EVM chains (PublicNode)', () => rpc(CHAINS.ethereum.rpc, { jsonrpc: '2.0', id: 1, method: 'eth_blockNumber', params: [] })],
-        ['Ethereum tokens (Blockscout)', () => getJSON(`https://eth.blockscout.com/api/v2/addresses/${addr}`)],
+        ['Ethereum tokens (Blockscout)', () => getJSON('https://eth.blockscout.com/api/v2/addresses/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045')],
         ['Solana (Jupiter)', () => getJSON('https://lite-api.jup.ag/ultra/v1/balances/vines1vzrYbzLMRdu58ou5XTby4qAqVRLmqo36NKPTg')],
       ];
       const results = await Promise.all(tests.map(async ([name, fn]) => {
@@ -745,7 +1019,7 @@ function openSettings() {
     });
     el.querySelector('#st-wipe').addEventListener('click', () => {
       if (!confirm('Remove all wallets and cached data from this device?')) return;
-      ['cw.wallets', 'cw.cache', 'cw.period', 'cw.hideSmall', 'cw.lockId', 'cw.tipDismissed'].forEach((k) => { try { localStorage.removeItem(k); } catch (e) { /* ignore */ } });
+      ['cw.wallets', 'cw.cache', 'cw.period', 'cw.hideSmall', 'cw.hideAmounts', 'cw.lockId', 'cw.tipDismissed'].forEach((k) => { try { localStorage.removeItem(k); } catch (e) { /* ignore */ } });
       location.hash = '#/'; location.reload();
     });
   });
@@ -770,8 +1044,8 @@ async function verifyLock() {
 function showLock() {
   if (!S.lockId) return;
   S.unlocked = false;
-  document.getElementById('lock-root').innerHTML = `<div class="lock"><span style="color:var(--accent)">${I.lock}</span><h2>CryptoWatch</h2>
-    <button class="primary" id="unlock-btn">Unlock with Face ID</button><div class="sub" id="unlock-err" style="font-size:13px;min-height:18px"></div></div>`;
+  document.getElementById('lock-root').innerHTML = `<div class="lock"><div class="empty" style="padding:0"><div class="art">${I.lock}</div></div><h2>CryptoWatch</h2>
+    <button class="btn" id="unlock-btn">Unlock with Face ID</button><div class="sub" id="unlock-err" style="font-size:13px;min-height:18px"></div></div>`;
   document.getElementById('unlock-btn').addEventListener('click', async () => {
     try { await verifyLock(); S.unlocked = true; document.getElementById('lock-root').innerHTML = ''; refresh(false); }
     catch (e) { document.getElementById('unlock-err').textContent = e.name === 'NotAllowedError' ? 'Cancelled — tap to try again.' : (e.message || String(e)); }
@@ -788,7 +1062,13 @@ document.addEventListener('click', async (e) => {
   const act = el.dataset.act;
   if (act === 'sheet-bg') { if (e.target === el) closeSheet(); return; }
   if (act === 'close') return closeSheet();
-  if (act === 'period') { S.period = el.dataset.p; save('cw.period', S.period); return renderMain(); }
+  if (act === 'period') {
+    if (S.period === el.dataset.p) return;
+    S.period = el.dataset.p; save('cw.period', S.period); renderMain();
+    refreshCharts(S.period, false).then(() => { saveCache(); renderMain(); }).catch(() => {});
+    return;
+  }
+  if (act === 'toggle-hide') { S.hide = !S.hide; save('cw.hideAmounts', S.hide); return renderMain(); }
   if (act === 'refresh') return refresh(true, true);
   if (act === 'add') return openEditor(null);
   if (act === 'edit') return openEditor(S.wallets.find((w) => w.id === el.dataset.w));
@@ -796,7 +1076,7 @@ document.addEventListener('click', async (e) => {
   if (act === 'receive') return openReceive(el.dataset.w || null);
   if (act.startsWith('ro-')) return openReadOnly(act.slice(3));
   if (act === 'dismiss-tip') { save('cw.tipDismissed', true); return renderMain(); }
-  if (act === 'copy') { try { await navigator.clipboard.writeText(el.dataset.text); toast('Address copied'); } catch (err) { toast("Couldn't copy"); } return; }
+  if (act === 'copy') { e.preventDefault(); try { await navigator.clipboard.writeText(el.dataset.text); toast('Address copied'); } catch (err) { toast("Couldn't copy"); } return; }
   if (act === 'share') { if (navigator.share) { try { await navigator.share({ text: el.dataset.text }); } catch (err) { /* cancelled */ } } else { try { await navigator.clipboard.writeText(el.dataset.text); toast('Address copied'); } catch (err) { /* ignore */ } } }
 });
 

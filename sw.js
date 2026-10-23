@@ -1,7 +1,7 @@
 // Caches the app shell so CryptoWatch opens instantly and works offline.
 // App files are always fetched fresh from the network first (bypassing the browser's HTTP cache)
 // so updates show up on the next launch; the cache is only used when offline. API calls are never cached.
-const CACHE = 'cryptowatch-v3';
+const CACHE = 'cryptowatch-v4';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-1024.png', './qrcode.min.js'];
 
 self.addEventListener('install', (e) => {
