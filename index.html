@@ -231,24 +231,26 @@ function badge(sym, size) {
 const chainTag = (c) => `<span class="tag" style="color:${CHAINS[c].tag[0]};background:${CHAINS[c].tag[1]}">${esc(CHAINS[c].name)}</span>`;
 
 // ---------- Networking ----------
-// Every request gets a time limit, so one stalled server can't freeze refreshing.
-async function timedFetch(url, opts, ms = 15000) {
-  const ctrl = new AbortController(); const t = setTimeout(() => ctrl.abort(), ms);
-  try { return await fetch(url, { ...opts, signal: ctrl.signal }); }
-  catch (e) { throw new Error(e.name === 'AbortError' ? `${new URL(url).host} took too long` : `${new URL(url).host} unreachable`); }
-  finally { clearTimeout(t); }
+// Every request (including reading the reply) has a hard time limit, so one stalled server
+// can't freeze refreshing. Promise.race guarantees we move on even if abort() is ignored.
+const APP_VERSION = '3';
+function fetchJSON(url, opts, ms = 10000) {
+  const host = new URL(url).host;
+  const ctrl = new AbortController();
+  let timer;
+  const timeout = new Promise((_, reject) => { timer = setTimeout(() => { ctrl.abort(); reject(new Error(`${host} took too long`)); }, ms); });
+  const work = (async () => {
+    let r;
+    try { r = await fetch(url, { ...opts, cache: 'no-store', signal: ctrl.signal }); }
+    catch (e) { throw new Error(`${host} unreachable`); }
+    if (r.status === 429) throw new Error(`${host} is rate limiting; will retry`);
+    if (!r.ok) throw new Error(`${host} returned ${r.status}`);
+    return r.json();
+  })();
+  return Promise.race([work, timeout]).finally(() => clearTimeout(timer));
 }
-async function getJSON(url) {
-  const r = await timedFetch(url, { cache: 'no-store' });
-  if (!r.ok) throw new Error(`${new URL(url).host} returned ${r.status}`);
-  return r.json();
-}
-async function rpc(url, body) {
-  const r = await timedFetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), cache: 'no-store' });
-  if (r.status === 429) throw new Error(`${new URL(url).host} is rate limiting; will retry`);
-  if (!r.ok) throw new Error(`${new URL(url).host} returned ${r.status}`);
-  return r.json();
-}
+const getJSON = (url) => fetchJSON(url, {});
+const rpc = (url, body) => fetchJSON(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 const hexNum = (h) => (!h || h === '0x') ? 0 : Number(BigInt(h));
 
 async function fetchHoldings(w) {
@@ -360,24 +362,37 @@ async function refreshPrices(forceCharts) {
 }
 let refreshRun = 0;
 async function refresh(force, manual) {
-  // A refresh stuck for over a minute (e.g. the phone suspended it) is abandoned so a new one can start.
-  if (S.refreshing && Date.now() - S.refreshStarted < 60e3) return;
+  // A refresh stuck for over 45s (e.g. the phone suspended it) is abandoned so a new one can start.
+  if (S.refreshing && Date.now() - S.refreshStarted < 45e3) {
+    if (manual) toast('Already updating…');
+    return;
+  }
   const run = ++refreshRun;
   S.refreshing = true; S.refreshStarted = Date.now();
+  if (manual) { S.spinning = true; renderMain(); }
+  // The button never spins for more than 25 seconds, whatever happens.
+  const spinGuard = manual ? setTimeout(() => { S.spinning = false; renderMain(); }, 25e3) : null;
   try {
-    renderMain();
     if (force || Date.now() - S.lastBal > BAL_EVERY) await refreshBalances();
     await refreshPrices(force);
     if (run === refreshRun) saveCache();
-    if (manual && run === refreshRun) toast(S.priceError ? "Couldn't reach price service" : 'Updated');
+    if (manual && run === refreshRun) {
+      const errs = Object.keys(S.errors).length;
+      toast(S.priceError ? "Couldn't reach the price service" : errs ? `Updated (${errs} wallet${errs > 1 ? 's' : ''} couldn't refresh)` : 'Updated');
+    }
   } catch (e) {
     if (manual) toast('Refresh failed — try again');
   } finally {
-    if (run === refreshRun) { S.refreshing = false; renderMain(); }
+    clearTimeout(spinGuard);
+    if (run === refreshRun) { S.refreshing = false; S.spinning = false; renderMain(); }
   }
 }
+// Next automatic update starts 30s after the previous one finishes, so they can never pile up.
 let timer = null;
-function startLoop() { clearInterval(timer); timer = setInterval(() => { if (!document.hidden) refresh(false); }, PRICE_EVERY); }
+function startLoop() {
+  clearTimeout(timer);
+  timer = setTimeout(async () => { if (!document.hidden) await refresh(false); startLoop(); }, PRICE_EVERY);
+}
 
 // ---------- Derived ----------
 function priced(r, chain) {
@@ -470,7 +485,7 @@ function liveStatus() {
 }
 function navHome() {
   return `<div class="nav"><div class="left"><button class="icon-btn" data-act="settings" aria-label="Settings">${I.gear}</button></div><div></div>
-    <div class="right"><button class="icon-btn" data-act="refresh" aria-label="Refresh"><span class="${S.refreshing ? 'spin' : ''}" style="display:inline-flex">${I.refresh}</span></button><button class="icon-btn" data-act="add" aria-label="Add wallet">${I.plus}</button></div></div>`;
+    <div class="right"><button class="icon-btn" data-act="refresh" aria-label="Refresh"><span class="${S.spinning ? 'spin' : ''}" style="display:inline-flex">${I.refresh}</span></button><button class="icon-btn" data-act="add" aria-label="Add wallet">${I.plus}</button></div></div>`;
 }
 function installTip() {
   const standalone = window.navigator.standalone || matchMedia('(display-mode: standalone)').matches;
@@ -691,7 +706,11 @@ function openSettings() {
       <div class="section-h">Data sources</div>
       <div class="card">${[['Prices & charts', 'DefiLlama'], ['Bitcoin', 'mempool.space'], ['Litecoin', 'litecoinspace.org'], ['EVM chains', 'PublicNode RPC'], ['Ethereum tokens', 'Blockscout'], ['Solana', 'Jupiter']].map(([a, b]) => `<div class="kv"><span>${a}</span><span class="sub">${b}</span></div>`).join('')}</div>
       <div class="section-f">Free public APIs, no account or key. Prices refresh every 30 seconds while open; balances every 2 minutes.</div>
+      <div class="section-h">Troubleshooting</div>
+      <div class="card"><button class="row" style="min-height:44px;color:var(--accent)" id="st-diag">Check connections</button><div id="st-diag-out"></div></div>
+      <div class="section-f">Tests each data service from this phone. If one fails, screenshot this and send it over.</div>
       <div class="card" style="margin-top:28px"><button class="danger" id="st-wipe">Remove all wallets &amp; data</button></div>
+      <div class="section-f" style="text-align:center;padding-top:16px">CryptoWatch web · version ${APP_VERSION}</div>
     </div>`, (el) => {
     el.querySelector('#st-hide').addEventListener('change', (e) => { S.hideSmall = e.target.checked; save('cw.hideSmall', S.hideSmall); renderMain(); });
     el.querySelector('#st-lock').addEventListener('change', async (e) => {
@@ -700,6 +719,29 @@ function openSettings() {
         if (box.checked) { await enableLock(); note.textContent = 'On. CryptoWatch will ask for Face ID when you open it.'; }
         else { await verifyLock(); S.lockId = null; save('cw.lockId', null); note.textContent = 'Off.'; }
       } catch (err) { box.checked = !box.checked; note.textContent = 'Not changed: ' + (err.message || err); }
+    });
+    el.querySelector('#st-diag').addEventListener('click', async (e) => {
+      const btn = e.currentTarget, out = el.querySelector('#st-diag-out');
+      btn.disabled = true; btn.textContent = 'Checking…';
+      const addr = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
+      const tests = [
+        ['Prices (DefiLlama)', () => getJSON(`${LLAMA}/prices/current/coingecko:bitcoin`)],
+        ['Price changes (DefiLlama)', () => getJSON(`${LLAMA}/percentage/coingecko:bitcoin?period=24h`)],
+        ['Charts (DefiLlama)', () => getJSON(`${LLAMA}/chart/coingecko:bitcoin?span=4&period=1d`)],
+        ['Bitcoin (mempool.space)', () => getJSON('https://mempool.space/api/address/1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa')],
+        ['Litecoin (litecoinspace)', () => getJSON('https://litecoinspace.org/api/blocks/tip/height')],
+        ['EVM chains (PublicNode)', () => rpc(CHAINS.ethereum.rpc, { jsonrpc: '2.0', id: 1, method: 'eth_blockNumber', params: [] })],
+        ['Ethereum tokens (Blockscout)', () => getJSON(`https://eth.blockscout.com/api/v2/addresses/${addr}`)],
+        ['Solana (Jupiter)', () => getJSON('https://lite-api.jup.ag/ultra/v1/balances/vines1vzrYbzLMRdu58ou5XTby4qAqVRLmqo36NKPTg')],
+      ];
+      const results = await Promise.all(tests.map(async ([name, fn]) => {
+        const t0 = performance.now();
+        try { await fn(); return `<div class="kv"><span>${esc(name)}</span><span class="up num">✓ ${Math.round(performance.now() - t0)} ms</span></div>`; }
+        catch (err) { return `<div class="kv"><span>${esc(name)}</span><span class="down" style="text-align:right;font-size:13px">✗ ${esc(err.message || err)}</span></div>`; }
+      }));
+      const walletErrs = S.wallets.filter((w) => S.errors[w.id]).map((w) => `<div class="kv"><span>${esc(w.name)}</span><span class="down" style="text-align:right;font-size:13px">${esc(S.errors[w.id])}</span></div>`);
+      out.innerHTML = results.join('') + walletErrs.join('');
+      btn.disabled = false; btn.textContent = 'Check again';
     });
     el.querySelector('#st-wipe').addEventListener('click', () => {
       if (!confirm('Remove all wallets and cached data from this device?')) return;
