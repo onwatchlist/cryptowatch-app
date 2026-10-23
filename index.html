@@ -1,0 +1,752 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CryptoWatch</title>
+<meta name="description" content="Read-only crypto wallet tracker">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="CryptoWatch">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-1024.png">
+<link rel="icon" href="icon-1024.png">
+<style>
+:root {
+  --bg: #F2F2F7; --card: #FFFFFF; --text: #000000; --sub: #6C6C70; --sep: #D8D8DC;
+  --accent: #007AFF; --accent-text: #0062CC; --seg: #E4E4E9; --seg-on: #FFFFFF;
+  --up: #248A3D; --down: #D70015; --pill-up: #248A3D; --pill-down: #D70015;
+  --chev: #B0B0B5; --dim: rgba(0,0,0,0.35); --field: #FFFFFF; --warn: #C93400;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #000000; --card: #1C1C1E; --text: #FFFFFF; --sub: #98989F; --sep: #38383A;
+    --accent: #0A84FF; --accent-text: #409CFF; --seg: #2C2C2E; --seg-on: #636366;
+    --up: #30D158; --down: #FF453A; --chev: #5A5A5E; --dim: rgba(0,0,0,0.6); --field: #1C1C1E; --warn: #FF9F0A;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #000000; --card: #1C1C1E; --text: #FFFFFF; --sub: #98989F; --sep: #38383A;
+  --accent: #0A84FF; --accent-text: #409CFF; --seg: #2C2C2E; --seg-on: #636366;
+  --up: #30D158; --down: #FF453A; --chev: #5A5A5E; --dim: rgba(0,0,0,0.6); --field: #1C1C1E; --warn: #FF9F0A;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; background: var(--bg); color: var(--text); }
+body {
+  font-family: -apple-system, "SF Pro Text", system-ui, sans-serif; font-size: 17px;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) calc(24px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
+  -webkit-text-size-adjust: 100%; overscroll-behavior-y: none;
+}
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+.wrap { max-width: 560px; margin: 0 auto; }
+.num { font-variant-numeric: tabular-nums; }
+.mono { font-family: ui-monospace, Menlo, monospace; }
+.sub { color: var(--sub); }
+.up { color: var(--up); } .down { color: var(--down); }
+
+.nav { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; min-height: 44px; padding: 4px 8px; }
+.nav .left { display: flex; justify-content: flex-start; }
+.nav .right { display: flex; justify-content: flex-end; gap: 2px; }
+.nav .title { font-weight: 600; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+.icon-btn { width: 44px; height: 44px; border: 0; background: transparent; color: var(--accent); display: inline-flex; align-items: center; justify-content: center; padding: 0; border-radius: 22px; }
+.text-btn { min-height: 44px; border: 0; background: transparent; color: var(--accent); padding: 0 8px; font-size: 17px; display: inline-flex; align-items: center; gap: 4px; }
+.text-btn.bold { font-weight: 600; }
+.text-btn:disabled { color: var(--sub); }
+.large-title { margin: 2px 16px 10px; font-size: 34px; font-weight: 700; letter-spacing: 0.3px; }
+.spin { animation: spin 0.9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.card { background: var(--card); border-radius: 12px; margin: 0 16px; overflow: hidden; }
+.pad { padding: 16px; }
+.section-h { padding: 22px 32px 7px; font-size: 13px; color: var(--sub); text-transform: uppercase; letter-spacing: 0.2px; }
+.section-f { padding: 8px 32px 0; font-size: 12px; color: var(--sub); line-height: 1.4; }
+
+.summary { display: flex; flex-direction: column; gap: 10px; }
+.big { font-size: 38px; font-weight: 700; letter-spacing: -0.5px; font-family: ui-rounded, -apple-system, system-ui, sans-serif; line-height: 1.1; overflow-wrap: anywhere; }
+.change-line { display: flex; gap: 6px; align-items: center; font-size: 15px; font-weight: 600; min-height: 20px; flex-wrap: wrap; }
+.seg { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px; background: var(--seg); border-radius: 9px; padding: 2px; }
+.seg button { height: 32px; border: 0; border-radius: 7px; background: transparent; font-size: 13px; font-weight: 500; }
+.seg button[aria-pressed="true"] { background: var(--seg-on); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+.chart { display: block; width: 100%; }
+.chart-empty { display: flex; align-items: center; justify-content: center; background: var(--seg); border-radius: 10px; font-size: 12px; color: var(--sub); }
+.caption { font-size: 11px; color: var(--sub); }
+
+.actions { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin: 18px 16px 0; }
+.action { display: flex; flex-direction: column; align-items: center; gap: 6px; border: 0; background: transparent; padding: 0; color: var(--text); font-size: 12px; font-weight: 500; }
+.action .circle { width: 52px; height: 52px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; color: #FFFFFF; }
+
+.row { display: flex; align-items: center; gap: 12px; padding: 10px 14px 10px 16px; min-height: 64px; width: 100%; border: 0; background: transparent; text-align: left; color: var(--text); text-decoration: none; position: relative; }
+.row + .row::before { content: ""; position: absolute; top: 0; left: 64px; right: 0; border-top: 0.5px solid var(--sep); }
+.row:active { background: var(--seg); }
+.row .main { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
+.row .name { font-size: 17px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row .meta { display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--sub); white-space: nowrap; overflow: hidden; }
+.row .end { display: flex; flex-direction: column; gap: 3px; align-items: flex-end; min-width: 80px; }
+.row .value { font-size: 15px; font-weight: 600; }
+.chev { flex-shrink: 0; color: var(--chev); }
+.wallet-icon { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #FFFFFF; }
+.badge { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #FFFFFF; font-size: 11px; font-weight: 700; letter-spacing: -0.2px; overflow: hidden; }
+.tag { font-size: 11px; font-weight: 600; border-radius: 99px; padding: 2px 6px; }
+.pill { font-size: 12px; font-weight: 600; color: #FFFFFF; border-radius: 6px; padding: 3px 7px; }
+.pill.up { background: var(--pill-up); color: #FFFFFF; } .pill.down { background: var(--pill-down); color: #FFFFFF; } .pill.none { background: transparent; color: var(--sub); }
+.spark { width: 52px; height: 24px; flex-shrink: 0; }
+.kv { display: flex; justify-content: space-between; align-items: center; padding: 0 16px; min-height: 44px; gap: 12px; }
+.kv + .kv { border-top: 0.5px solid var(--sep); }
+.warn { color: var(--warn); font-size: 14px; display: flex; gap: 8px; align-items: flex-start; padding: 12px 16px; }
+.live { display: flex; gap: 6px; align-items: center; padding: 10px 32px; font-size: 11px; color: var(--sub); }
+.dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.empty { text-align: center; padding: 60px 32px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.primary { border: 0; border-radius: 12px; background: var(--accent); color: #FFFFFF; font-weight: 600; min-height: 48px; padding: 0 22px; font-size: 17px; }
+.secondary { border: 0; border-radius: 12px; background: var(--seg); color: var(--accent-text); font-weight: 600; min-height: 48px; padding: 0 22px; font-size: 17px; }
+.danger { border: 0; background: transparent; color: var(--down); min-height: 44px; font-size: 17px; width: 100%; text-align: left; padding: 0 16px; }
+.install-tip { margin: 0 16px 12px; padding: 12px 14px; border-radius: 12px; background: var(--card); font-size: 14px; line-height: 1.4; display: flex; gap: 10px; align-items: flex-start; }
+
+/* Sheets */
+.sheet-backdrop { position: fixed; inset: 0; background: var(--dim); z-index: 50; display: flex; align-items: flex-end; justify-content: center; animation: fade 0.2s ease; }
+.sheet { width: 100%; max-width: 560px; max-height: calc(100% - 40px - env(safe-area-inset-top)); background: var(--bg); border-radius: 12px 12px 0 0; display: flex; flex-direction: column; animation: up 0.25s ease; padding-bottom: env(safe-area-inset-bottom); }
+.sheet .grab { width: 36px; height: 5px; border-radius: 3px; background: var(--chev); margin: 6px auto 0; }
+.sheet .body { overflow-y: auto; padding-bottom: 24px; -webkit-overflow-scrolling: touch; }
+@keyframes up { from { transform: translateY(40px); opacity: 0.6; } to { transform: none; opacity: 1; } }
+@keyframes fade { from { opacity: 0; } }
+.field { display: block; padding: 0 16px; min-height: 44px; }
+.field + .field { border-top: 0.5px solid var(--sep); }
+.field input, .field select, .field textarea { width: 100%; border: 0; outline: 0; background: transparent; min-height: 44px; font-size: 17px; padding: 0; }
+.field textarea { resize: none; padding: 11px 0; font-family: ui-monospace, Menlo, monospace; font-size: 16px; line-height: 1.35; }
+.field-row { display: flex; align-items: center; gap: 8px; }
+.field-row select { appearance: none; -webkit-appearance: none; text-align: right; color: var(--sub); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.toggle { position: relative; width: 51px; height: 31px; flex-shrink: 0; }
+.toggle input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.toggle span { position: absolute; inset: 0; border-radius: 16px; background: var(--seg); transition: background 0.2s; pointer-events: none; }
+.toggle span::after { content: ""; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: transform 0.2s; }
+.toggle input:checked + span { background: #34C759; }
+.toggle input:checked + span::after { transform: translateX(20px); }
+.qr { background: #FFFFFF; padding: 12px; border-radius: 12px; width: 220px; height: 220px; }
+.qr svg { width: 100%; height: 100%; display: block; }
+.toast { position: fixed; left: 50%; bottom: calc(30px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: rgba(40,40,40,0.92); color: #FFFFFF; padding: 10px 16px; border-radius: 20px; font-size: 14px; z-index: 90; animation: fade 0.2s; }
+
+/* Lock */
+.lock { position: fixed; inset: 0; z-index: 100; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 32px; text-align: center; }
+.lock h2 { margin: 0; font-size: 22px; }
+</style>
+</head>
+<body>
+<div class="wrap" id="main" aria-live="off"></div>
+<div id="sheet-root"></div>
+<div id="lock-root"></div>
+<noscript><p style="padding: 24px">CryptoWatch needs JavaScript turned on.</p></noscript>
+<script src="qrcode.min.js"></script>
+<script>
+'use strict';
+
+// ---------- Icons ----------
+const I = {
+  gear: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+  plus: '<svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="currentColor"/><path d="M12 7v10M7 12h10" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round"/></svg>',
+  refresh: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5"/></svg>',
+  back: '<svg width="12" height="20" viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2 2 10l8 8"/></svg>',
+  chev: '<svg class="chev" width="8" height="14" viewBox="0 0 8 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 1.5 6.5 7l-5 5.5"/></svg>',
+  wallet: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18M16 14.5h2"/></svg>',
+  copy: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>',
+  compass: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg>',
+  share: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>',
+  clip: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6"/></svg>',
+  warn: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;margin-top:1px"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></svg>',
+  hand: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0"><path d="M18 11V6a2 2 0 0 0-4 0v5M14 10V4a2 2 0 0 0-4 0v6M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.9-6-2.4l-3.6-3.6a2 2 0 0 1 2.8-2.8L7 15"/></svg>',
+  lock: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+  shareIos: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px"><path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>',
+  a: (d) => `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`,
+};
+
+// ---------- Chains ----------
+const CHAINS = {
+  bitcoin:  { name: 'Bitcoin', sym: 'BTC', native: 'coingecko:bitcoin', coin: 'Bitcoin', color: '#E8820C', tag: ['#9A5200', '#FDF0E1'], kind: 'utxo', api: 'https://mempool.space/api', explorer: 'https://mempool.space/address/', ph: 'bc1q… / 1… / 3…' },
+  ethereum: { name: 'Ethereum', sym: 'ETH', native: 'coingecko:ethereum', coin: 'Ethereum', color: '#5856D6', tag: ['#3A3AA8', '#E8E8F8'], kind: 'evm', llama: 'ethereum', rpc: 'https://ethereum-rpc.publicnode.com', explorer: 'https://etherscan.io/address/', ph: '0x…',
+    tokens: ['0xdac17f958d2ee523a2206206994597c13d831ec7', '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599', '0x6b175474e89094c44da98b954eedeac495271d0f'] },
+  solana:   { name: 'Solana', sym: 'SOL', native: 'coingecko:solana', coin: 'Solana', color: '#1F9E8A', tag: ['#11685B', '#DDF3EF'], kind: 'sol', rpc: 'https://solana-rpc.publicnode.com', explorer: 'https://solscan.io/account/', ph: 'Solana address' },
+  base:     { name: 'Base', sym: 'ETH', native: 'coingecko:ethereum', coin: 'Ethereum', color: '#007AFF', tag: ['#0057B8', '#E0EEFF'], kind: 'evm', llama: 'base', rpc: 'https://base-rpc.publicnode.com', explorer: 'https://basescan.org/address/', ph: '0x…',
+    tokens: ['0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', '0x4200000000000000000000000000000000000006', '0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf'] },
+  arbitrum: { name: 'Arbitrum', sym: 'ETH', native: 'coingecko:ethereum', coin: 'Ethereum', color: '#1B8FB5', tag: ['#0B6A88', '#E0F3FA'], kind: 'evm', llama: 'arbitrum', rpc: 'https://arbitrum-one-rpc.publicnode.com', explorer: 'https://arbiscan.io/address/', ph: '0x…',
+    tokens: ['0xaf88d065e77c8cc2239327c5edb3a432268e5831', '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9', '0x82af49447d8a07e3bd95bd0d56f35241523fbab1', '0x912ce59144191c1204e64559fe8253a0e49e6548'] },
+  optimism: { name: 'Optimism', sym: 'ETH', native: 'coingecko:ethereum', coin: 'Ethereum', color: '#E0302B', tag: ['#B0201C', '#FCE6E5'], kind: 'evm', llama: 'optimism', rpc: 'https://optimism-rpc.publicnode.com', explorer: 'https://optimistic.etherscan.io/address/', ph: '0x…',
+    tokens: ['0x0b2c639c533813f4aa9d7837caf62653d097ff85', '0x4200000000000000000000000000000000000006', '0x4200000000000000000000000000000000000042'] },
+  polygon:  { name: 'Polygon', sym: 'POL', native: 'coingecko:polygon-ecosystem-token', coin: 'Polygon', color: '#8247E5', tag: ['#6232B8', '#F0E8FC'], kind: 'evm', llama: 'polygon', rpc: 'https://polygon-bor-rpc.publicnode.com', explorer: 'https://polygonscan.com/address/', ph: '0x…',
+    tokens: ['0x3c499c542cef5e3811e1192ce70d8cc03d5c3359', '0xc2132d05d31c914a87c6611c10748aeb04b58e8f', '0x7ceb23fd6bc0add59e62ac25578270cff1b9f619'] },
+  bsc:      { name: 'BNB Chain', sym: 'BNB', native: 'coingecko:binancecoin', coin: 'BNB', color: '#C99400', tag: ['#7A5A00', '#FBF1D6'], kind: 'evm', llama: 'bsc', rpc: 'https://bsc-rpc.publicnode.com', explorer: 'https://bscscan.com/address/', ph: '0x…',
+    tokens: ['0x55d398326f99059ff775485246999027b3197955', '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d', '0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c', '0x2170ed0880ac9a755fd29b2688956bd959f933f8'] },
+  litecoin: { name: 'Litecoin', sym: 'LTC', native: 'coingecko:litecoin', coin: 'Litecoin', color: '#7A7A80', tag: ['#55555A', '#EDEDF0'], kind: 'utxo', api: 'https://litecoinspace.org/api', explorer: 'https://litecoinspace.org/address/', ph: 'ltc1… / L… / M…' },
+};
+const PERIODS = ['1h', '24h', '7d', '30d'];
+const LLAMA = 'https://coins.llama.fi';
+const PRICE_EVERY = 30e3, BAL_EVERY = 120e3, CHART_EVERY = 600e3;
+
+// ---------- State ----------
+function load(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } }
+function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* storage full or blocked */ } }
+
+const S = {
+  wallets: load('cw.wallets', []),
+  period: load('cw.period', '24h'),
+  hideSmall: load('cw.hideSmall', true),
+  lockId: load('cw.lockId', null),
+  raw: {}, prices: {}, changes: {}, charts: {}, errors: {},
+  priceError: null, lastUpdated: null, refreshing: false, lastBal: 0, lastChart: 0,
+  unlocked: false,
+};
+(() => {
+  const c = load('cw.cache', null);
+  if (c) { S.raw = c.raw || {}; S.prices = c.prices || {}; S.changes = c.changes || {}; S.charts = c.charts || {}; S.lastUpdated = c.lastUpdated || null; }
+})();
+function saveCache() { save('cw.cache', { raw: S.raw, prices: S.prices, changes: S.changes, charts: S.charts, lastUpdated: S.lastUpdated }); }
+function saveWallets() { save('cw.wallets', S.wallets); }
+
+// ---------- Formatting ----------
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function usd(v) {
+  const a = Math.abs(v);
+  if (a > 0 && a < 0.01) return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumSignificantDigits: 3 }).format(v);
+  const max = a === 0 ? 2 : a < 1 ? 4 : 2;
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: Math.min(2, max), maximumFractionDigits: max }).format(v);
+}
+const sUsd = (v) => (v >= 0 ? '+' : '−') + usd(Math.abs(v));
+const pct = (v) => (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2) + '%';
+const amt = (v) => new Intl.NumberFormat('en-US', { maximumFractionDigits: v >= 1000 ? 2 : v >= 1 ? 4 : 8 }).format(v);
+const short = (a) => a.length > 14 ? a.slice(0, 6) + '…' + a.slice(-4) : a;
+const dir = (v) => v >= 0 ? 'up' : 'down';
+function pill(p) { return p == null ? '<span class="pill none">—</span>' : `<span class="pill ${dir(p)} num">${pct(p)}</span>`; }
+function badgeColor(sym) {
+  const pal = ['#C8650A', '#2E6FD8', '#7B3FC4', '#C2185B', '#00838F', '#5856D6', '#2E7D32', '#C62828', '#1F8A79', '#0277BD', '#6D4C41'];
+  let h = 0; for (const ch of sym) h = (h * 31 + ch.codePointAt(0)) & 0x7fffffff;
+  return pal[h % pal.length];
+}
+function badge(sym, size) {
+  const t = sym.length > 4 ? sym.slice(0, 3) : sym;
+  const s = size ? `width:${size}px;height:${size}px;font-size:${Math.round(size * 0.3)}px` : '';
+  return `<span class="badge" style="background:${badgeColor(sym)};${s}" aria-hidden="true">${esc(t)}</span>`;
+}
+const chainTag = (c) => `<span class="tag" style="color:${CHAINS[c].tag[0]};background:${CHAINS[c].tag[1]}">${esc(CHAINS[c].name)}</span>`;
+
+// ---------- Networking ----------
+async function getJSON(url) {
+  const r = await fetch(url, { cache: 'no-store' });
+  if (!r.ok) throw new Error(`${new URL(url).host} returned ${r.status}`);
+  return r.json();
+}
+async function rpc(url, body) {
+  const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), cache: 'no-store' });
+  if (r.status === 429) throw new Error(`${new URL(url).host} is rate limiting; will retry`);
+  if (!r.ok) throw new Error(`${new URL(url).host} returned ${r.status}`);
+  return r.json();
+}
+const hexNum = (h) => (!h || h === '0x') ? 0 : Number(BigInt(h));
+
+async function fetchHoldings(w) {
+  const c = CHAINS[w.chain];
+  if (c.kind === 'utxo') {
+    const d = await getJSON(`${c.api}/address/${encodeURIComponent(w.address)}`);
+    const sats = d.chain_stats.funded_txo_sum - d.chain_stats.spent_txo_sum + d.mempool_stats.funded_txo_sum - d.mempool_stats.spent_txo_sum;
+    return [{ key: c.native, amount: sats / 1e8, symbol: c.sym, name: c.coin, native: true }];
+  }
+  if (c.kind === 'sol') {
+    // Solana's official public RPC blocks browser requests, so use Jupiter's balances API
+    // (SOL + every SPL / Token-2022 token in one call), with PublicNode as a SOL-only fallback.
+    try {
+      const b = await getJSON(`https://lite-api.jup.ag/ultra/v1/balances/${encodeURIComponent(w.address)}`);
+      const out = [{ key: c.native, amount: Number(b.SOL?.uiAmount || 0), symbol: 'SOL', name: 'Solana', native: true }];
+      Object.entries(b).filter(([mint, v]) => mint !== 'SOL' && Number(v?.uiAmount) > 0)
+        .sort((x, y) => y[1].uiAmount - x[1].uiAmount).slice(0, 150)
+        .forEach(([mint, v]) => out.push({ key: `solana:${mint}`, amount: Number(v.uiAmount), native: false }));
+      return out;
+    } catch (e) {
+      const r = await rpc(c.rpc, { jsonrpc: '2.0', id: 1, method: 'getBalance', params: [w.address] });
+      if (!r.result) throw new Error(r.error?.message || "Couldn't read SOL balance");
+      return [{ key: c.native, amount: r.result.value / 1e9, symbol: 'SOL', name: 'Solana', native: true }];
+    }
+  }
+  // EVM
+  const addr = w.address.toLowerCase();
+  const out = []; const found = new Set();
+  if (w.chain === 'ethereum') {
+    try {
+      const list = await getJSON(`https://eth.blockscout.com/api/v2/addresses/${addr}/token-balances`);
+      for (const b of list) {
+        const t = b.token || {};
+        const contract = (t.address_hash || t.address || '').toLowerCase();
+        const raw = Number(b.value);
+        if (t.type !== 'ERC-20' || t.exchange_rate == null || (t.reputation && t.reputation !== 'ok') || !contract || !(raw > 0)) continue;
+        out.push({ key: `ethereum:${contract}`, amount: raw / 10 ** Number(t.decimals || 18), symbol: t.symbol, name: t.name, native: false });
+        found.add(contract);
+      }
+    } catch (e) { /* discovery is best effort */ }
+  }
+  const tokens = [...new Set([...(c.tokens || []), ...(w.tokens || []).map((x) => x.toLowerCase())])].filter((x) => !found.has(x));
+  const owner = addr.slice(2).padStart(64, '0');
+  const calls = [{ jsonrpc: '2.0', id: 0, method: 'eth_getBalance', params: [addr, 'latest'] }];
+  tokens.forEach((tk, i) => {
+    calls.push({ jsonrpc: '2.0', id: 1 + i * 2, method: 'eth_call', params: [{ to: tk, data: '0x70a08231' + owner }, 'latest'] });
+    calls.push({ jsonrpc: '2.0', id: 2 + i * 2, method: 'eth_call', params: [{ to: tk, data: '0x313ce567' }, 'latest'] });
+  });
+  const res = await rpc(c.rpc, calls);
+  if (!Array.isArray(res)) throw new Error(res?.error?.message || 'Unexpected RPC response');
+  const byId = {}; res.forEach((r) => { if (typeof r.result === 'string') byId[r.id] = r.result; });
+  if (byId[0] === undefined) throw new Error(`Couldn't read ${c.sym} balance`);
+  out.unshift({ key: c.native, amount: hexNum(byId[0]) / 1e18, symbol: c.sym, name: c.coin, native: true });
+  tokens.forEach((tk, i) => {
+    const raw = hexNum(byId[1 + i * 2]); if (!(raw > 0)) return;
+    const decHex = byId[2 + i * 2]; const dec = decHex && decHex.length > 2 ? Math.min(hexNum(decHex), 36) : 18;
+    out.push({ key: `${c.llama}:${tk}`, amount: raw / 10 ** dec, native: false });
+  });
+  return out;
+}
+
+async function chunked(keys, size, fn) {
+  const u = [...new Set(keys)].sort(); const out = {};
+  for (let i = 0; i < u.length; i += size) Object.assign(out, await fn(u.slice(i, i + size).join(',')));
+  return out;
+}
+const fetchPrices = (keys) => chunked(keys, 50, async (j) => (await getJSON(`${LLAMA}/prices/current/${j}`)).coins);
+const fetchChanges = (keys, p) => chunked(keys, 50, async (j) => {
+  const c = (await getJSON(`${LLAMA}/percentage/${j}?period=${p}`)).coins; const o = {};
+  for (const k in c) if (typeof c[k] === 'number') o[k] = c[k];
+  return o;
+});
+// DefiLlama allows at most 500 points per request: 42 points x 11 coins = 462.
+async function fetchCharts(keys) {
+  const u = [...new Set(keys)].sort(), start = Math.floor(Date.now() / 1000) - 7 * 86400, out = {};
+  const groups = []; for (let i = 0; i < u.length; i += 11) groups.push(u.slice(i, i + 11).join(','));
+  await Promise.all(groups.map(async (j) => {
+    try {
+      const c = (await getJSON(`${LLAMA}/chart/${j}?start=${start}&span=42&period=4h`)).coins;
+      for (const k in c) out[k] = c[k].prices.map((p) => [p.timestamp, p.price]);
+    } catch (e) { /* skip this batch; others still show */ }
+  }));
+  return out;
+}
+
+// ---------- Refresh ----------
+async function refreshBalances(only) {
+  const list = only ? [only] : S.wallets;
+  await Promise.all(list.map(async (w) => {
+    try { S.raw[w.id] = await fetchHoldings(w); delete S.errors[w.id]; }
+    catch (e) { S.errors[w.id] = e.message || String(e); }
+  }));
+  if (!only) S.lastBal = Date.now();
+}
+async function refreshPrices(forceCharts) {
+  const keys = new Set(); S.wallets.forEach((w) => { keys.add(CHAINS[w.chain].native); (S.raw[w.id] || []).forEach((h) => keys.add(h.key)); });
+  const list = [...keys]; if (!list.length) return;
+  try {
+    const [p, ...ch] = await Promise.all([fetchPrices(list), ...PERIODS.map((x) => fetchChanges(list, x))]);
+    S.prices = p; PERIODS.forEach((x, i) => { S.changes[x] = ch[i]; });
+    S.priceError = null; S.lastUpdated = Date.now();
+  } catch (e) { S.priceError = 'Prices: ' + (e.message || e); }
+  if (forceCharts || Date.now() - S.lastChart > CHART_EVERY) {
+    try {
+      const top = allAssets().slice(0, 40).map((a) => a.key);
+      if (top.length) { Object.assign(S.charts, await fetchCharts(top)); S.lastChart = Date.now(); }
+    } catch (e) { /* charts are optional */ }
+  }
+}
+async function refresh(force) {
+  if (S.refreshing) return; S.refreshing = true; renderMain();
+  try {
+    if (force || Date.now() - S.lastBal > BAL_EVERY) await refreshBalances();
+    await refreshPrices(force);
+    saveCache();
+  } finally { S.refreshing = false; renderMain(); }
+}
+let timer = null;
+function startLoop() { clearInterval(timer); timer = setInterval(() => { if (!document.hidden) refresh(false); }, PRICE_EVERY); }
+
+// ---------- Derived ----------
+function priced(r, chain) {
+  const info = S.prices[r.key]; if (!info) return null;
+  if (!r.native && info.confidence != null && info.confidence < 0.8) return null;
+  const symbol = r.symbol || (info.symbol || '?').toUpperCase();
+  return { key: r.key, symbol, name: r.name || symbol, chain: r.native ? null : chain, amount: r.amount, price: info.price, value: r.amount * info.price };
+}
+const visible = (h) => S.hideSmall ? h.value >= 1 : h.amount > 0;
+function walletHoldings(w) { return (S.raw[w.id] || []).map((r) => priced(r, w.chain)).filter(Boolean).filter(visible).sort((a, b) => b.value - a.value); }
+function allAssets() {
+  const m = {};
+  S.wallets.forEach((w) => (S.raw[w.id] || []).forEach((r) => {
+    const h = priced(r, w.chain); if (!h) return;
+    if (m[h.key]) { m[h.key].amount += h.amount; m[h.key].value += h.value; } else m[h.key] = { ...h };
+  }));
+  return Object.values(m).filter(visible).sort((a, b) => b.value - a.value);
+}
+const chg = (key, p) => S.changes[p || S.period]?.[key];
+function totalChange(hs, p) {
+  let now = 0, before = 0;
+  hs.forEach((h) => { const c = chg(h.key, p); if (c == null) return; now += h.value; before += h.value / (1 + c / 100); });
+  return before > 0 ? { amount: now - before, pct: (now / before - 1) * 100 } : null;
+}
+const total = (hs) => hs.reduce((s, h) => s + h.value, 0);
+// Portfolio value over 7 days at current amounts. Each coin's series is matched to the
+// nearest timestamp of the longest series (batches come back with slightly different times).
+// Coins without a chart are added at their current value so the curve ends at the real total.
+function valueHistory(hs) {
+  const series = [], flat = [];
+  hs.forEach((h) => { const s = S.charts[h.key]; (s && s.length > 1 ? series : flat).push([h, s]); });
+  if (!series.length) return [];
+  const ref = series.reduce((a, b) => (b[1].length > a[1].length ? b : a))[1];
+  const base = flat.reduce((sum, [h]) => sum + h.value, 0);
+  return ref.map(([t]) => [t, series.reduce((sum, [h, s]) => {
+    let best = s[0]; for (const p of s) if (Math.abs(p[0] - t) < Math.abs(best[0] - t)) best = p;
+    return sum + best[1] * h.amount;
+  }, base)]);
+}
+
+// ---------- Charts ----------
+function linePath(pts, w, h, pad) {
+  const ys = pts.map((p) => p[1]); let lo = Math.min(...ys), hi = Math.max(...ys);
+  if (hi === lo) { hi += 1; lo -= 1; }
+  return pts.map((p, i) => `${i ? 'L' : 'M'}${(i / (pts.length - 1) * w).toFixed(1)} ${(pad + (1 - (p[1] - lo) / (hi - lo)) * (h - 2 * pad)).toFixed(1)}`).join(' ');
+}
+function chart(pts, h) {
+  if (!pts || pts.length < 2) return `<div class="chart-empty" style="height:${h}px">Chart loading…</div>`;
+  const w = 300, d = linePath(pts, w, h, 6), c = pts[pts.length - 1][1] >= pts[0][1] ? 'var(--up)' : 'var(--down)';
+  return `<svg class="chart" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" style="height:${h}px" aria-hidden="true"><path d="${d} L${w} ${h} L0 ${h} Z" fill="${c}" fill-opacity="0.13"/><path d="${d}" fill="none" stroke="${c}" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+}
+function spark(pts) {
+  if (!pts || pts.length < 2) return '<span class="spark"></span>';
+  const c = pts[pts.length - 1][1] >= pts[0][1] ? 'var(--up)' : 'var(--down)';
+  return `<svg class="spark" viewBox="0 0 52 24" preserveAspectRatio="none" aria-hidden="true"><path d="${linePath(pts, 52, 24, 2)}" fill="none" stroke="${c}" stroke-width="1.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>`;
+}
+
+// ---------- Views ----------
+function seg() {
+  return `<div class="seg" role="group" aria-label="Period">${PERIODS.map((p) => `<button data-act="period" data-p="${p}" aria-pressed="${p === S.period}">${p.toUpperCase()}</button>`).join('')}</div>`;
+}
+function summary(title, hs) {
+  const t = total(hs), c = totalChange(hs);
+  return `<section class="card pad summary">
+    <div class="sub" style="font-size:15px">${esc(title)}</div>
+    <div class="big num">${usd(t)}</div>
+    <div class="change-line num ${c ? dir(c.amount) : ''}">${c ? `${I.a(c.amount >= 0 ? 'M7 17 17 7M9 7h8v8' : 'M7 7l10 10M17 9v8H9').replace('width="22" height="22"', 'width="14" height="14"')}<span>${sUsd(c.amount)} (${pct(c.pct)})</span><span class="sub">${S.period.toUpperCase()}</span>` : '&nbsp;'}</div>
+    ${seg()}
+    ${chart(valueHistory(hs), 120)}
+    <div class="caption">7-day value at current holdings</div>
+  </section>`;
+}
+function actions(walletId) {
+  const a = (act, label, d) => `<button class="action" data-act="${act}" ${walletId ? `data-w="${walletId}"` : ''}><span class="circle">${I.a(d)}</span>${label}</button>`;
+  return `<div class="actions">${a('ro-buy', 'Buy', 'M12 5v14M5 12h14')}${a('ro-sell', 'Sell', 'M5 12h14')}${a('ro-swap', 'Swap', 'M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7')}${a('ro-send', 'Send', 'M7 17 17 7M9 7h8v8')}${a('receive', 'Receive', 'M17 7 7 17M15 17H7V9')}</div>`;
+}
+function holdingRow(h, withChain) {
+  return `<a class="row" href="#/asset/${encodeURIComponent(h.key)}">
+    ${badge(h.symbol)}
+    <span class="main"><span class="name" style="display:flex;gap:6px;align-items:center">${esc(h.symbol)} ${withChain && h.chain ? chainTag(h.chain) : ''}</span>
+      <span class="meta num">${amt(h.amount)} · ${usd(h.price)}</span></span>
+    ${spark(S.charts[h.key])}
+    <span class="end"><span class="value num">${usd(h.value)}</span>${pill(chg(h.key))}</span>${I.chev}</a>`;
+}
+function liveStatus() {
+  const ok = !S.priceError;
+  let txt = 'Loading prices…';
+  if (S.lastUpdated) { const s = Math.max(0, Math.round((Date.now() - S.lastUpdated) / 1000)); txt = `Live · updated ${s < 60 ? s + ' sec' : Math.round(s / 60) + ' min'} ago · prices refresh every 30s`; }
+  return `<div class="live"><span class="dot" style="background:${ok ? 'var(--up)' : 'var(--warn)'}"></span><span id="live-text">${txt}</span></div>`;
+}
+function navHome() {
+  return `<div class="nav"><div class="left"><button class="icon-btn" data-act="settings" aria-label="Settings">${I.gear}</button></div><div></div>
+    <div class="right"><button class="icon-btn" data-act="refresh" aria-label="Refresh"><span class="${S.refreshing ? 'spin' : ''}" style="display:inline-flex">${I.refresh}</span></button><button class="icon-btn" data-act="add" aria-label="Add wallet">${I.plus}</button></div></div>`;
+}
+function installTip() {
+  const standalone = window.navigator.standalone || matchMedia('(display-mode: standalone)').matches;
+  if (standalone || load('cw.tipDismissed', false)) return '';
+  return `<div class="install-tip"><span style="flex:1">Install it: tap ${I.shareIos} <b>Share</b> in Safari, then <b>Add to Home Screen</b>.</span><button class="text-btn" style="min-height:24px;padding:0" data-act="dismiss-tip" aria-label="Dismiss">✕</button></div>`;
+}
+
+function viewHome() {
+  if (!S.wallets.length) {
+    return `${navHome()}<h1 class="large-title">Portfolio</h1>${installTip()}
+      <div class="empty"><span style="color:var(--accent)">${I.lock.replace(/48/g, '64')}</span><h2 style="margin:0">Track any wallet</h2>
+      <p class="sub" style="margin:0;line-height:1.4">Add a public wallet address to see its coins, balances and live price moves. Read-only — never enter a seed phrase or private key.</p>
+      <button class="primary" data-act="add">Add wallet</button></div>`;
+  }
+  const assets = allAssets();
+  const walletRows = S.wallets.map((w) => {
+    const hs = walletHoldings(w), c = totalChange(hs), loading = !S.raw[w.id] && !S.errors[w.id];
+    return `<a class="row" href="#/wallet/${w.id}">
+      <span class="wallet-icon" style="background:${CHAINS[w.chain].color}">${I.wallet}</span>
+      <span class="main"><span class="name">${esc(w.name)}${S.errors[w.id] ? ` <span style="color:var(--warn)" title="Couldn't refresh">${I.warn.replace(/18/g, '14')}</span>` : ''}</span>
+        <span class="meta">${chainTag(w.chain)}<span class="mono">${esc(short(w.address))}</span></span></span>
+      <span class="end">${loading ? '<span class="sub" style="font-size:13px">Loading…</span>' : `<span class="value num">${usd(total(hs))}</span>${pill(c && c.pct)}`}</span>${I.chev}</a>`;
+  }).join('');
+  return `${navHome()}<h1 class="large-title">Portfolio</h1>${installTip()}
+    ${summary('Total balance', assets)}
+    ${actions(null)}
+    ${S.priceError ? `<div class="card" style="margin-top:16px"><div class="warn">${I.warn}<span>${esc(S.priceError)}</span></div></div>` : ''}
+    <div class="section-h">Wallets</div><div class="card">${walletRows}</div>
+    <div class="section-h">Assets</div><div class="card">${assets.length ? assets.map((a) => holdingRow(a, true)).join('') : `<div class="kv sub">${S.refreshing ? 'Loading…' : 'No priced holdings yet'}</div>`}</div>
+    ${liveStatus()}`;
+}
+
+function viewWallet(id) {
+  const w = S.wallets.find((x) => x.id === id);
+  if (!w) return `<div class="nav"><div class="left"><a class="text-btn" href="#/">${I.back} Portfolio</a></div></div><p class="sub" style="text-align:center">Wallet removed</p>`;
+  const hs = walletHoldings(w), c = CHAINS[w.chain];
+  return `<div class="nav"><div class="left"><a class="text-btn" href="#/">${I.back} Portfolio</a></div><div class="title">${esc(w.name)}</div>
+    <div class="right"><button class="text-btn" data-act="edit" data-w="${w.id}">Edit</button></div></div>
+    <div style="height:12px"></div>
+    ${summary(c.name + ' balance', hs)}
+    ${actions(w.id)}
+    <div class="section-h">Address</div>
+    <div class="card">
+      <button class="row" style="min-height:44px" data-act="copy" data-text="${esc(w.address)}"><span class="mono" style="flex:1;font-size:13px;word-break:break-all">${esc(w.address)}</span><span style="color:var(--accent)">${I.copy}</span></button>
+      <a class="row" style="min-height:44px;color:var(--accent)" href="${esc(c.explorer + w.address)}" target="_blank" rel="noopener">${I.compass}<span>View on explorer</span></a>
+    </div>
+    ${S.errors[w.id] ? `<div class="card" style="margin-top:16px"><div class="warn">${I.warn}<span>Couldn't refresh balances: ${esc(S.errors[w.id])}</span></div></div>` : ''}
+    <div class="section-h">Holdings</div>
+    <div class="card">${hs.length ? hs.map((h) => holdingRow(h, false)).join('') : `<div class="kv sub">${S.raw[w.id] ? 'No priced holdings found' : 'Loading…'}</div>`}</div>
+    ${S.hideSmall ? '<div class="section-f">Balances under $1 and unpriced (often spam) tokens are hidden. Change this in Settings.</div>' : ''}`;
+}
+
+function viewAsset(key) {
+  const a = allAssets().find((x) => x.key === key);
+  const held = S.wallets.map((w) => { const r = (S.raw[w.id] || []).find((x) => x.key === key); const h = r && priced(r, w.chain); return h && h.amount > 0 ? [w, h] : null; }).filter(Boolean);
+  const sym = a?.symbol || held[0]?.[1].symbol || 'Coin';
+  const price = S.prices[key]?.price, pts = S.charts[key];
+  let hiLo = '';
+  if (pts && pts.length > 1) { const ys = pts.map((p) => p[1]); hiLo = `<div class="caption num" style="display:flex;justify-content:space-between"><span>7-day low ${usd(Math.min(...ys))}</span><span>high ${usd(Math.max(...ys))}</span></div>`; }
+  return `<div class="nav"><div class="left"><a class="text-btn" href="#/">${I.back} Portfolio</a></div><div class="title">${esc(sym)}</div><div></div></div>
+    <div style="height:12px"></div>
+    <section class="card pad summary">
+      <div style="display:flex;align-items:center;gap:12px">${badge(sym, 44)}<div style="display:flex;flex-direction:column;gap:3px"><b>${esc(a?.name || sym)}</b>${a?.chain ? `<span>${chainTag(a.chain)}</span>` : ''}</div></div>
+      ${price != null ? `<div class="big num" style="font-size:34px">${usd(price)}</div>` : ''}
+      ${chart(pts, 170)}${hiLo}
+      <div class="caption">Price, last 7 days</div>
+    </section>
+    <div class="section-h">Price change</div>
+    <div class="card">${PERIODS.map((p) => { const c = chg(key, p); const d = c != null && a ? a.value - a.value / (1 + c / 100) : null;
+      return `<div class="kv"><span style="width:44px;font-weight:500">${p.toUpperCase()}</span><span style="flex:1;text-align:right" class="num ${d != null ? dir(d) : ''}">${d != null ? sUsd(d) : ''}</span><span style="min-width:76px;text-align:right">${pill(c)}</span></div>`; }).join('')}</div>
+    ${a ? `<div class="section-h">Your position</div><div class="card"><div class="kv"><span>Amount</span><span class="sub num">${amt(a.amount)} ${esc(a.symbol)}</span></div><div class="kv"><span>Value</span><span class="sub num">${usd(a.value)}</span></div></div>` : ''}
+    ${held.length ? `<div class="section-h">Held in</div><div class="card">${held.map(([w, h]) => `<a class="row" href="#/wallet/${w.id}" style="min-height:56px"><span class="main"><span style="font-size:17px">${esc(w.name)}</span><span class="meta">${chainTag(w.chain)}<span class="mono">${esc(short(w.address))}</span></span></span><span class="end"><span class="num">${usd(h.value)}</span><span class="sub num" style="font-size:12px">${amt(h.amount)}</span></span>${I.chev}</a>`).join('')}</div>` : ''}`;
+}
+
+function route() { const h = location.hash.replace(/^#/, '') || '/'; const [, kind, arg] = h.split('/'); return { kind: kind || 'home', arg: arg ? decodeURIComponent(arg) : null }; }
+function renderMain() {
+  const r = route(); const main = document.getElementById('main');
+  main.innerHTML = r.kind === 'wallet' ? viewWallet(r.arg) : r.kind === 'asset' ? viewAsset(r.arg) : viewHome();
+}
+window.addEventListener('hashchange', () => { renderMain(); window.scrollTo(0, 0); });
+setInterval(() => { const el = document.getElementById('live-text'); if (el && S.lastUpdated) { const s = Math.max(0, Math.round((Date.now() - S.lastUpdated) / 1000)); el.textContent = `Live · updated ${s < 60 ? s + ' sec' : Math.round(s / 60) + ' min'} ago · prices refresh every 30s`; } }, 1000);
+
+// ---------- Sheets ----------
+function openSheet(html, onMount) {
+  const root = document.getElementById('sheet-root');
+  root.innerHTML = `<div class="sheet-backdrop" data-act="sheet-bg"><div class="sheet" role="dialog" aria-modal="true">${'<div class="grab"></div>'}${html}</div></div>`;
+  document.body.style.overflow = 'hidden';
+  if (onMount) onMount(root.querySelector('.sheet'));
+}
+function closeSheet() { document.getElementById('sheet-root').innerHTML = ''; document.body.style.overflow = ''; }
+function sheetNav(left, title, right) { return `<div class="nav"><div class="left">${left}</div><div class="title">${esc(title)}</div><div class="right">${right}</div></div>`; }
+function toast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 1600); }
+
+// Address checks (same rules as the iOS app)
+const RX = {
+  evm: /^0x[0-9a-fA-F]{40}$/, btc: /^(bc1[02-9ac-hj-np-z]{25,87}|[13][1-9A-HJ-NP-Za-km-z]{25,34})$/,
+  ltc: /^(ltc1[02-9ac-hj-np-z]{25,87}|[LM3][1-9A-HJ-NP-Za-km-z]{25,34})$/, sol: /^[1-9A-HJ-NP-Za-km-z]{32,44}$/,
+};
+function addrProblem(s, chain) {
+  if (/^(xpub|ypub|zpub|ltub|mtub)/i.test(s)) return "Extended public keys (xpub) aren't supported. Add individual receive addresses instead.";
+  const k = CHAINS[chain].kind; const ok = k === 'evm' ? RX.evm.test(s) : chain === 'bitcoin' ? RX.btc.test(s) : chain === 'litecoin' ? RX.ltc.test(s) : RX.sol.test(s);
+  return ok ? null : `That doesn't look like a valid ${CHAINS[chain].name} address.`;
+}
+function detectChain(s) {
+  if (RX.evm.test(s)) return 'ethereum';
+  if (s.startsWith('bc1') || (/^[13]/.test(s) && s.length <= 35 && RX.btc.test(s))) return 'bitcoin';
+  if (s.startsWith('ltc1') || (/^[LM]/.test(s) && s.length <= 35 && RX.ltc.test(s))) return 'litecoin';
+  if (s.length >= 36 && RX.sol.test(s)) return 'solana';
+  return null;
+}
+function looksSecret(text) {
+  const t = text.trim(); if (!t) return false;
+  const words = t.split(/[\s,]+/).filter(Boolean);
+  if (words.length >= 12 && words.every((w) => /^\p{L}+$/u.test(w))) return true;
+  if (t.startsWith('[') && (t.match(/,/g) || []).length >= 60) return true;
+  return words.some((w) => /^(0x)?[0-9a-fA-F]{64}$/.test(w) || /^[xyztuv]prv[1-9A-HJ-NP-Za-km-z]{100,}$/.test(w) || /^[5KLc9][1-9A-HJ-NP-Za-km-z]{50,51}$/.test(w) || /^[1-9A-HJ-NP-Za-km-z]{80,90}$/.test(w));
+}
+
+function openEditor(existing) {
+  const w = existing || { name: '', chain: 'ethereum', address: '', tokens: [] };
+  openSheet(`${sheetNav('<button class="text-btn" data-act="close">Cancel</button>', existing ? 'Edit Wallet' : 'Add Wallet', '<button class="text-btn bold" id="ed-save" disabled>Save</button>')}
+    <div class="body">
+      <div id="ed-secret" hidden style="margin-top:12px"><div class="card"><div class="warn" style="color:var(--down)">${I.hand}<span>This looks like a <b>seed phrase or private key</b>. Never type those into any app or website. This app only needs your <b>public address</b>.</span></div><button class="danger" id="ed-clear" style="border-top:0.5px solid var(--sep)">Clear it</button></div></div>
+      <div class="card" style="margin-top:16px">
+        <label class="field"><span class="sr">Name</span><input id="ed-name" placeholder="Name (e.g. Ledger, Main)" value="${esc(w.name)}" autocomplete="off"></label>
+        <label class="field field-row"><span style="flex:1">Network</span><select id="ed-chain">${Object.entries(CHAINS).map(([k, c]) => `<option value="${k}" ${k === w.chain ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select></label>
+      </div>
+      <div class="section-h">Public address</div>
+      <div class="card"><div class="field field-row"><label style="flex:1"><span class="sr">Public address</span><textarea id="ed-addr" rows="2" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="${esc(CHAINS[w.chain].ph)}">${esc(w.address)}</textarea></label>
+        <button class="icon-btn" id="ed-paste" aria-label="Paste from clipboard">${I.clip}</button></div></div>
+      <div class="section-f" id="ed-addr-note" style="font-size:13px"></div>
+      <div id="ed-tokens-box">
+        <div class="section-h">Extra token contracts (optional)</div>
+        <div class="card"><label class="field"><span class="sr">Extra token contracts</span><textarea id="ed-tokens" rows="2" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="0x… one per line" style="font-size:13px">${esc((w.tokens || []).join('\n'))}</textarea></label></div>
+        <div class="section-f" id="ed-tokens-note" style="font-size:13px"></div>
+      </div>
+      ${existing ? `<div class="card" style="margin-top:28px"><button class="danger" id="ed-remove">Remove wallet</button></div><div class="section-f">This only removes it from this app. Nothing happens to the wallet itself.</div>` : ''}
+    </div>`, (el) => {
+    const $ = (id) => el.querySelector('#' + id);
+    let detected = false;
+    const tokenList = () => $('ed-tokens').value.split(/[\s,]+/).map((x) => x.trim()).filter(Boolean);
+    function check(fromAddr) {
+      const chain = $('ed-chain').value, addr = $('ed-addr').value.trim();
+      if (fromAddr && addr && addrProblem(addr, chain)) { const d = detectChain(addr); if (d) { $('ed-chain').value = d; detected = true; } }
+      const c = $('ed-chain').value, isEvm = CHAINS[c].kind === 'evm';
+      $('ed-addr').placeholder = CHAINS[c].ph;
+      const secret = looksSecret($('ed-addr').value) || looksSecret($('ed-tokens').value);
+      $('ed-secret').hidden = !secret;
+      const prob = addr ? addrProblem(addr, c) : null;
+      const note = $('ed-addr-note');
+      note.style.color = prob ? 'var(--down)' : '';
+      note.textContent = prob || (detected && addr ? `Detected ${CHAINS[c].name} address.` : isEvm ? 'The same 0x address works on every EVM network — add it once per network you use.' : '');
+      $('ed-tokens-box').hidden = !isEvm;
+      const bad = isEvm ? tokenList().filter((x) => !RX.evm.test(x)) : [];
+      const tn = $('ed-tokens-note');
+      tn.style.color = bad.length ? 'var(--down)' : '';
+      tn.textContent = bad.length ? 'Not a valid contract address: ' + bad.join(', ') : c === 'ethereum' ? 'Ethereum tokens are found automatically. Add a contract here if one is missing.' : 'Major tokens (USDC, USDT, WETH…) are checked automatically. Add any other token contract here.';
+      $('ed-save').disabled = !addr || !!prob || secret || bad.length > 0;
+    }
+    $('ed-addr').addEventListener('input', () => check(true));
+    $('ed-tokens').addEventListener('input', () => check(false));
+    $('ed-chain').addEventListener('change', () => { detected = false; check(false); });
+    $('ed-clear').addEventListener('click', () => { $('ed-addr').value = ''; $('ed-tokens').value = ''; check(false); });
+    $('ed-paste').addEventListener('click', async () => { try { $('ed-addr').value = (await navigator.clipboard.readText()).trim(); check(true); } catch (e) { toast('Paste not allowed — long-press the field instead'); } });
+    $('ed-save').addEventListener('click', () => {
+      const chain = $('ed-chain').value, name = $('ed-name').value.trim() || `${CHAINS[chain].name} wallet`;
+      const nw = { id: existing?.id || crypto.randomUUID(), name, chain, address: $('ed-addr').value.trim(), tokens: CHAINS[chain].kind === 'evm' ? tokenList().map((x) => x.toLowerCase()) : [] };
+      const i = S.wallets.findIndex((x) => x.id === nw.id);
+      if (i >= 0) S.wallets[i] = nw; else S.wallets.push(nw);
+      if (existing && (existing.address !== nw.address || existing.chain !== nw.chain)) delete S.raw[nw.id];
+      saveWallets(); closeSheet(); renderMain();
+      refreshBalances(nw).then(() => refreshPrices(true)).then(() => { saveCache(); renderMain(); });
+    });
+    if (existing) $('ed-remove').addEventListener('click', () => {
+      if (!confirm(`Remove ${existing.name}? This only removes it from this app.`)) return;
+      S.wallets = S.wallets.filter((x) => x.id !== existing.id); delete S.raw[existing.id]; delete S.errors[existing.id];
+      saveWallets(); saveCache(); closeSheet(); location.hash = '#/'; renderMain();
+    });
+    check(false);
+    if (!existing) setTimeout(() => $('ed-addr').focus(), 250);
+  });
+}
+
+function openReceive(walletId) {
+  const list = walletId ? S.wallets.filter((w) => w.id === walletId) : S.wallets;
+  const qrSvg = (text) => { try { const q = qrcode(0, 'M'); q.addData(text); q.make(); return q.createSvgTag({ cellSize: 4, margin: 0, scalable: true }); } catch (e) { return ''; } };
+  openSheet(`${sheetNav('<span></span>', 'Receive', '<button class="text-btn bold" data-act="close">Done</button>')}
+    <div class="body">${list.length ? list.map((w) => `
+      <div class="card pad" style="margin-top:16px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center">
+        <div style="display:flex;gap:8px;align-items:center"><b>${esc(w.name)}</b>${chainTag(w.chain)}</div>
+        <div class="qr" role="img" aria-label="QR code of the address">${qrSvg(w.address)}</div>
+        <div class="mono" style="font-size:14px;word-break:break-all;line-height:1.4">${esc(w.address)}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%">
+          <button class="primary" data-act="copy" data-text="${esc(w.address)}">Copy</button>
+          <button class="secondary" data-act="share" data-text="${esc(w.address)}">${I.share} Share</button>
+        </div>
+        <div class="sub" style="font-size:13px">Only send ${esc(CHAINS[w.chain].name)}-network assets to this address.</div>
+      </div>`).join('') : '<p class="sub" style="text-align:center;margin-top:40px">Add a wallet first.</p>'}</div>`);
+}
+
+function openReadOnly(what) {
+  openSheet(`${sheetNav('<span></span>', 'Read-only app', '<button class="text-btn bold" data-act="close">OK</button>')}
+    <div class="body"><div class="card pad" style="margin-top:16px;line-height:1.45">CryptoWatch only views balances, so it can't ${esc(what)}. Open the wallet app that holds this address (Ledger Live, MetaMask, Phantom, Coinbase Wallet…). Any change shows up here automatically.</div></div>`);
+}
+
+function openSettings() {
+  const lockSupported = !!(window.PublicKeyCredential && navigator.credentials);
+  openSheet(`${sheetNav('<span></span>', 'Settings', '<button class="text-btn bold" data-act="close">Done</button>')}
+    <div class="body">
+      <div class="section-h">Privacy</div>
+      <div class="card"><label class="kv"><span>Require Face ID</span><span class="toggle"><input type="checkbox" id="st-lock" ${S.lockId ? 'checked' : ''} ${lockSupported ? '' : 'disabled'}><span></span></span></label></div>
+      <div class="section-f" id="st-lock-note">${lockSupported ? 'Asks for Face ID (or your passcode) when you open the app and hides it when you leave. Your phone saves a passkey named “CryptoWatch” for this.' : 'Face ID lock isn’t available in this browser.'}</div>
+      <div class="section-h">Display</div>
+      <div class="card"><label class="kv"><span>Hide balances under $1</span><span class="toggle"><input type="checkbox" id="st-hide" ${S.hideSmall ? 'checked' : ''}><span></span></span></label></div>
+      <div class="section-f">Also hides tokens with no reliable market price, which are usually airdropped spam.</div>
+      <div class="section-h">Safety</div>
+      <div class="card"><div class="kv" style="padding:12px 16px;line-height:1.4">Read-only. Wallet addresses are stored only in this browser on this device. Never enter a seed phrase or private key — no tracker needs it.</div></div>
+      <div class="section-h">Data sources</div>
+      <div class="card">${[['Prices & charts', 'DefiLlama'], ['Bitcoin', 'mempool.space'], ['Litecoin', 'litecoinspace.org'], ['EVM chains', 'PublicNode RPC'], ['Ethereum tokens', 'Blockscout'], ['Solana', 'Jupiter']].map(([a, b]) => `<div class="kv"><span>${a}</span><span class="sub">${b}</span></div>`).join('')}</div>
+      <div class="section-f">Free public APIs, no account or key. Prices refresh every 30 seconds while open; balances every 2 minutes.</div>
+      <div class="card" style="margin-top:28px"><button class="danger" id="st-wipe">Remove all wallets &amp; data</button></div>
+    </div>`, (el) => {
+    el.querySelector('#st-hide').addEventListener('change', (e) => { S.hideSmall = e.target.checked; save('cw.hideSmall', S.hideSmall); renderMain(); });
+    el.querySelector('#st-lock').addEventListener('change', async (e) => {
+      const box = e.target; const note = el.querySelector('#st-lock-note');
+      try {
+        if (box.checked) { await enableLock(); note.textContent = 'On. CryptoWatch will ask for Face ID when you open it.'; }
+        else { await verifyLock(); S.lockId = null; save('cw.lockId', null); note.textContent = 'Off.'; }
+      } catch (err) { box.checked = !box.checked; note.textContent = 'Not changed: ' + (err.message || err); }
+    });
+    el.querySelector('#st-wipe').addEventListener('click', () => {
+      if (!confirm('Remove all wallets and cached data from this device?')) return;
+      ['cw.wallets', 'cw.cache', 'cw.period', 'cw.hideSmall', 'cw.lockId', 'cw.tipDismissed'].forEach((k) => { try { localStorage.removeItem(k); } catch (e) { /* ignore */ } });
+      location.hash = '#/'; location.reload();
+    });
+  });
+}
+
+// ---------- Face ID lock (WebAuthn platform authenticator) ----------
+const rand = (n) => crypto.getRandomValues(new Uint8Array(n));
+const toB64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
+const fromB64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+async function enableLock() {
+  const cred = await navigator.credentials.create({ publicKey: {
+    challenge: rand(32), rp: { name: 'CryptoWatch' },
+    user: { id: rand(16), name: 'CryptoWatch', displayName: 'CryptoWatch' },
+    pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+    authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'preferred' },
+    timeout: 60000 } });
+  S.lockId = toB64(cred.rawId); save('cw.lockId', S.lockId); S.unlocked = true;
+}
+async function verifyLock() {
+  await navigator.credentials.get({ publicKey: { challenge: rand(32), allowCredentials: [{ type: 'public-key', id: fromB64(S.lockId) }], userVerification: 'required', timeout: 60000 } });
+}
+function showLock() {
+  if (!S.lockId) return;
+  S.unlocked = false;
+  document.getElementById('lock-root').innerHTML = `<div class="lock"><span style="color:var(--accent)">${I.lock}</span><h2>CryptoWatch</h2>
+    <button class="primary" id="unlock-btn">Unlock with Face ID</button><div class="sub" id="unlock-err" style="font-size:13px;min-height:18px"></div></div>`;
+  document.getElementById('unlock-btn').addEventListener('click', async () => {
+    try { await verifyLock(); S.unlocked = true; document.getElementById('lock-root').innerHTML = ''; refresh(false); }
+    catch (e) { document.getElementById('unlock-err').textContent = e.name === 'NotAllowedError' ? 'Cancelled — tap to try again.' : (e.message || String(e)); }
+  });
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { if (S.lockId) showLock(); }
+  else if (!S.lockId || S.unlocked) refresh(false);
+});
+
+// ---------- Global clicks ----------
+document.addEventListener('click', async (e) => {
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  const act = el.dataset.act;
+  if (act === 'sheet-bg') { if (e.target === el) closeSheet(); return; }
+  if (act === 'close') return closeSheet();
+  if (act === 'period') { S.period = el.dataset.p; save('cw.period', S.period); return renderMain(); }
+  if (act === 'refresh') return refresh(true);
+  if (act === 'add') return openEditor(null);
+  if (act === 'edit') return openEditor(S.wallets.find((w) => w.id === el.dataset.w));
+  if (act === 'settings') return openSettings();
+  if (act === 'receive') return openReceive(el.dataset.w || null);
+  if (act.startsWith('ro-')) return openReadOnly(act.slice(3));
+  if (act === 'dismiss-tip') { save('cw.tipDismissed', true); return renderMain(); }
+  if (act === 'copy') { try { await navigator.clipboard.writeText(el.dataset.text); toast('Address copied'); } catch (err) { toast("Couldn't copy"); } return; }
+  if (act === 'share') { if (navigator.share) { try { await navigator.share({ text: el.dataset.text }); } catch (err) { /* cancelled */ } } else { try { await navigator.clipboard.writeText(el.dataset.text); toast('Address copied'); } catch (err) { /* ignore */ } } }
+});
+
+// ---------- Start ----------
+renderMain();
+if (S.lockId) showLock(); else S.unlocked = true;
+refresh(true);
+startLoop();
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
